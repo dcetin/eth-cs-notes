@@ -1,0 +1,49 @@
+
+% Norm
+\newcommand{\snorm}[1]{||#1||}
+\newcommand{\bnorm}[1]{\left\lVert#1\right\rVert}
+
+% Kullback-Leibler divergence
+\DeclarePairedDelimiterX{\infdivx}[2]{(}{)}{%
+  #1\;\delimsize\|\;#2%
+}
+\newcommand{\dkl}{D_{KL}\infdivx}
+\newcommand{\djs}{D_{JS}\infdivx}
+
+% Shorthand
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\loss}{\mathcal{L}}
+\newcommand{\risk}{\mathcal{L}}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\goes}{\rightarrow}
+\newcommand{\given}{\mid}
+\newcommand{\normal}{\mathcal{N}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\Eu}{\mathop{\mathbb{E}}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\rank}{\text{rank}}
+\newcommand{\sigm}{\mathop{\text{sigm}}}
+\def\BState{\State\hskip-\ALG@thistlm}
+
+% Examples
+
+% Multiline simple equation
+%\begin{equation*}
+%\begin{split}
+%	def &= stuff \\
+%	&= stuff \\
+%\end{split}
+%\end{equation*}
+
+% Multiline commented equation
+%\begin{flalign*}
+%	def &= stuff & exp \\
+%	&= stuff & exp \\
+%\end{flalign*}
+
+% Partial function definition
+%\begin{cases}
+%exp & \text{ if } case \\
+%exp & \text{ if } case
+%\end{cases}

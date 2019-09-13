@@ -1,0 +1,62 @@
+\ProvidesPackage{notes}
+
+% Packages
+\usepackage{bookmark}
+\usepackage[sort&compress,square,comma,numbers]{natbib}
+\usepackage{graphicx}
+\usepackage{subcaption}
+%\hypersetup{bookmarks,bookmarksopen,bookmarksdepth=2}
+\hypersetup{hidelinks}
+\usepackage[margin=1in]{geometry} 
+\usepackage{amsmath,amsthm,amssymb}
+%\usepackage{scrextend}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\usepackage{lipsum}
+\usepackage{xargs}
+\usepackage[pdftex,dvipsnames]{xcolor}
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{mathtools}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{tocloft}
+
+% Shorthand for mathematical expressions
+\usepackage{shorthand}
+
+% Todo notes
+\newcommandx{\must}[2][1=]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,#1]{#2}}
+\newcommandx{\maybe}[2][1=]{\todo[linecolor=blue,backgroundcolor=blue!25,bordercolor=blue,#1]{#2}}
+
+% Spacing
+%\setlist{nosep, after=\smallskip}
+\setlength{\parskip}{\smallskipamount}
+\setlength{\headheight}{15pt}
+
+% List items
+\newcommand{\pro}{\item[$+$]}
+\newcommand{\con}{\item[$-$]}
+
+% Unordered list
+\newcommand{\ulb}{\begin{enumerate}[label=\textbullet,topsep=0pt,itemsep=-0.5ex,partopsep=1ex,parsep=1ex]}
+\newcommand{\ule}{\end{enumerate}\vspace{1mm}}
+
+% Ordered list
+\newcommand{\olb}{\begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]}
+\newcommand{\ole}{\end{enumerate}\vspace{1mm}}
+
+% Quotes
+\usepackage [english]{babel}
+\usepackage [autostyle, english = american]{csquotes}
+\MakeOuterQuote{"}
+
+% Multicolumn
+\newcommand{\mcb}[1]{\begin{multicols}{#1}}
+\newcommand{\mce}{\end{multicols}\noindent}
+
+% Minipage
+\newcommand{\mpb}[1]{\begin{minipage}[t]{#1}}
+\newcommand{\mpe}{\end{minipage}
+}

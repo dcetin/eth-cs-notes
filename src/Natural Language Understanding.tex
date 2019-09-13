@@ -1,0 +1,608 @@
+\documentclass[12pt]{article}
+
+\usepackage{notes}
+\setlength\cftparskip{0pt}
+\setlength\cftbeforesecskip{1pt}
+\setlength\cftaftertoctitleskip{1pt}
+
+\begin{document}
+
+\lhead{Spring 2019}
+\chead{Natural Language Understanding}
+\rhead{\today}
+
+\title{Natural Language Understanding}
+\author{Doruk Çetin}
+\maketitle
+
+\tableofcontents
+\pagebreak
+
+\section{Basics}
+\ulb
+\item Morphology: studies the structure of words.
+\item Morpheme: the smallest grammatical unit in a language.
+\item Inflectional morphology: the study of the processes (such as affixation and vowel change) that distinguish the forms of words in certain grammatical categories.
+\item Derivational morpheme: an affix that's added to a word to create a new word or a new form of a word.
+\item Corpus: a computer-readable collection of text or speech.
+\item Lemma: a set of lexical forms having the same stem, the same major part-of-speech, and the same word sense.
+\item Word form: the full inflected or derived form of the word.
+\item Tokenization: the task of segmenting running text into words.
+\item Normalization: the task of putting words/tokens in a standard format.
+\item Lemmatization: the task of determining that two words have the same root, despite their surface differences.
+\item Stemming: a simpler but cruder method, which mainly consists of chopping off word-final affixes.
+\item Minimum edit distance between two strings is defined distance as the minimum number of editing operations (operations like insertion, deletion, substitution) needed to transform one string into another. It can be computed by dynamic programming.
+\item Levenshtein distance between two sequences is the simplest weighting factor in which each of the three operations has a cost of 1
+\item Word embeddings: latent vector representation of words.
+\ule
+Basic text normalization:
+\ulb
+\item Segmenting/tokenizing words from running text
+\item Normalizing word formats
+\item Segmenting sentences in running text.
+\ule
+\par The Viterbi algorithm is a probabilistic extension of minimum edit distance. Instead of computing the "minimum edit distance" between two strings, Viterbi computes the "maximum probability alignment" of one string with another.
+\par The Porter algorithm is a simple and efficient way to do stemming, stripping off affixes. It does not have high accuracy but may be useful for some tasks.
+
+\section{Language Models}
+\par Language Models (LMs): models that assign probabilities to sequences of words. We always represent and compute language model probabilities in log format as log probabilities.
+\ulb
+\item Use cases (Redundancy): speech recognition, handwriting recognition, spelling correct.
+\item Use cases (Synthesis): machine translation, text summarization
+\ule
+The assumption that the probability of a word depends only on the previous word is called a \textbf{Markov assumption}. Estimating the probabilities by chain rule without Markov assumption is ill-fated as there are too many possible sentences.
+\par $k$-th order Markov assumption is also called \textbf{n-gram model} ($n = k+1$). In general, n-gram modeling is insufficient as languages have long-term dependencies. n-grams only work well for word prediction if the test corpus looks like the training corpus.
+\par How to deal with huge web-scale n-grams: pruning w.r.t. some threshold, entropy-based pruning, efficient data structures like tries, Huffman coding, probability quantization...
+
+\subsection{Perplexity}
+\par An intrinsic evaluation metric is one that measures the quality of a model independent of any application.
+\par The \textbf{perplexity} of a discrete probability distribution p is defined as
+\[ 2^{H(p)} = 2^{ -\sum_x p(x) \log_2 p(x) } \]
+The perplexity is the exponentiation of the entropy, which is a more clear cut quantity. In the special case where p models a fair k-sided die (a uniform distribution over k discrete events), its perplexity is k (equal to branching factor). For perplexity over words this means the size of the vocabulary.
+\par The more information the model gives us about the word sequence, the lower the perplexity. Minimizing perplexity is the same as maximizing probability.
+\par \textbf{Perplexity of a model} (as the normalized inverse probability):
+\begin{equation*}
+\begin{split}
+PP(X) = 2^{H(p)} &= 2^{ -\sum_{i=1}^N p(x_i) \log_2 q(x_i) } \\
+&= 2^{ -\sum_{i=1}^N \frac{1}{N} \log_2 q(x_i) } \\
+&= q(x_1)^{-\frac{1}{N}}q(x_2)^{-\frac{1}{N}}\dots q(x_N)^{-\frac{1}{N}} \\
+&= \prod_{i=1}^N q(x_i)^{-\frac{1}{N}} \\
+&= \sqrt[N]{\frac{1}{q(x_1)q(x_2)\dots q(x_N)}}
+\end{split}
+\end{equation*}
+where $p(x_i)$ is the real distribution ($x_i$ are the words here) and $q(x_i)$ is our prediction. Here we assumed that all words will have the same probability (1 / \# of words) in $p$.
+\par The difference between the perplexity of a (language) model and the true perplexity of the language is an indication of the quality of the model.
+\par Cross entropy $H(p,\widetilde{p})$, where $\widetilde{p}$ is the language model, is an upper bound on true sequence entropy $H(p)$:
+\begin{equation}
+\begin{split}
+H(p,\widetilde{p}) &= \sum_w p(w) \log(\widetilde{p}) \\
+ &= \sum_w p(w) \log \left( \widetilde{p}(w) \frac{p(w)}{p(w)}\right) \\
+ &= \sum_w p(w) \log p(w) + \sum_w p(w) \log \left( \frac{\widetilde{p}(w)}{p(w)}\right) \\
+ &= H(p) + \dkl{p}{\widetilde{p}} \\
+ &\geq H(p)
+\end{split}
+\end{equation}
+
+\subsection{Zeros and Smoothing}
+\par Smoothing: best effort to estimate \textbf{non-zero probabilities}, rather than using raw counts.
+\par These zeros— things that don’t ever occur in the training set but do occur in the test set—are a problem for two reasons. First, their presence means we are underestimating the probability of all sorts of words that might occur, which will hurt the performance of any application we want to run on this data.
+\par Second, if the probability of any word in the test set is 0, the entire probability of the test set is 0. By definition, perplexity is based on the inverse probability of the test set. Thus if some words have zero probability, we can’t compute perplexity at all, since we can’t divide by 0!
+\par \textbf{Laplace (add-one) smoothing:} add one to all probabilities before normalization, e.g. for bigrams:
+\[ P_{MLE}(w_i\given w_{i-1}) = \frac{c(w_{i-1},w_i)}{c(w_{i-1})} ,\;\;\;\; P_{Add-1}(w_i\given w_{i-1}) = \frac{c(w_{i-1},w_i) + 1}{c(w_{i-1}) + V} \]
+Add-1 estimation is a blunt instrument, not used for n-gram l language modeling in practice but used in other domains (text categorization) where the number of zeroes is not so huge.
+\par \textbf{add-k smoothing:} add a fractional count, instead of adding 1:
+\[ P_{Add-k}(w_i\given w_{i-1}) = \frac{c(w_{i-1},w_i) + k}{c(w_{i-1}) + kV} \]
+
+\subsection{Backoff and Interpolation}
+\par Idea: sometimes it helps to use less context. Condition on less context for contexts you have not learned much about:
+\ulb
+\item Backoff: use trigram if you have good evidence, otherwise bigram, otherwise unigram (we only "back off" to a lower-order n-gram if we have zero evidence for a higher-order n-gram)
+\item Interpolation: always mix unigram, bigram, trigram etc. (works better than backoff)
+\ule
+\textbf{Linear interpolation:} set the lambdas by maximizing probability of held-out data
+\[ \hat{P}(w_n\given w_{n-1}w_{n-2}) = \lambda_1 P(w_n\given w_{n-1}w_{n-2}) + \lambda_2 P(w_n\given w_{n-1}) + \lambda_3 P(w_n)\]
+Lambdas conditional on context:
+\[ \hat{P}(w_n\given w_{n-1}w_{n-2}) = \lambda_1(w_{n-2}^{n-1}) P(w_n\given w_{n-1}w_{n-2}) + \lambda_2(w_{n-2}^{n-1}) P(w_n\given w_{n-1}) + \lambda_3(w_{n-2}^{n-1}) P(w_n)\]
+\par \textbf{Out of vocabulary (OOV)} words can occur in open vocabulary tasks. Create an unknown word token $\langle\text{UNK}\rangle$ and change any word that is not in the lexicon to $\langle\text{UNK}\rangle$.
+\par \textbf{Stupid backoff:} it is very simple but works well in large scale. Use MLE if the count is greater than zero, if not backoff to the lower order n-gram with some constant weight (e.g. if trigram occurs use trigram, if not use bigram probability times $0.4$). Stupid backoff does not produce probabilities.
+\par A related way to view smoothing is as discounting (lowering) some non-zero counts in order to get the probability mass that will be assigned to the zero counts. Both backoff and interpolation require discounting to create a probability distribution. The sharp change in counts and probabilities may occur if too much probability mass is moved to all the zeros.
+
+\subsection{Good-Turing Smoothing}
+Add-k smoothing, alternative formulation:
+\[ P_{Add-k}(w_i\given w_{i-1}) = \frac{c(w_{i-1},w_i) + k}{c(w_{i-1}) + kV} = \frac{c(w_{i-1},w_i) + m(\frac{1}{V})}{c(w_{i-1}) + m} \]
+Unigram prior smoothing (basically interpolation):
+\[ P_{UnigramPrior}(w_i\given w_{i-1}) = \frac{c(w_{i-1},w_i) + mP(w_i)}{c(w_{i-1}) + m} \]
+\par Idea of the \textbf{Good-Turing Smoothing} is to use the counts of things we have seen once to help estimate the count of things we have never seen.
+\par Define $N_c$ as the frequency of frequency $c$ (the count of things we have seen $c$ times). Probability mass to be assigned to k-frequent types is
+\[ P^k_{GT} = \frac{(k+1)N_{k+1}}{N} \]
+compare with the observed probability $\hat{P}^k = kN_k / N$. Discount factor is $\frac{k^*}{k} = \frac{k+1}{k} \frac{N_{k+1}}{N_k}$.
+\par We cannot always use the $n+1^{st}$ word to do the estimation 
+Simple Good-Turing: use Good-Turing for lower orders and estimate the higher order terms by a best fit power law:
+\[ \frac{k^*}{k} = \frac{(k+1)k^{\alpha}}{k(k+1)^{\alpha}} = \left( \frac{k}{k+1} \right)^{\alpha-1} < 1 \text{ for } N_k \propto k^{-\alpha} \text{, } \alpha > 1 \]
+Approximate discount "law" is empirically found to be $k^* = k - 0.75$
+
+\subsection{Kneser-Ney Smoothing}
+\par \textbf{Absolute discounting} formalizes this intuition by subtracting a fixed (absolute) discount $d$ from each count. Basic idea is to free up probability mass from n-gram counts and redistribute it to (n-1)-gram model via interpolation. Example: probability of an unseen bigram $(w',w) \propto p(w) \approx \#(w) / N$
+\par Absolute Discounting Interpolation:
+\[ P_{AbsoluteDiscounting} (w_i \given w_{i-1}) = \frac{c(w_{i-1},w_i) - d}{c(w_{i-1})} + \lambda(w_{i-1})P(w) \]
+Maybe keeping a couple extra values of d for counts 1 and 2. Interpolation weights are for normalizing the probability distribution (for the probability mass we have discounted). We apply this recursively, e.g. smoothing trigrams with bigrams.
+\par \textbf{Kneser-Ney discounting} augments absolute discounting with a more sophisticated way to handle the lower-order unigram distribution. The Kneser-Ney intuition is to base our estimate of $P_{Continutation}$ on the number of different contexts word w has appeared in, that is, the number of bigram types it completes. Every bigram type was a novel continuation the first time it was seen. The unigram is useful exactly when we have not seen the bigram of interest. A frequent word (Francisco) occurring in only one context (San) will have a low continuation probability. Context probability replaces naive unigrams.
+\[ P_{Continutation}(w) = \frac{\text{distinct bigrams with $w$}}{\text{distinct bigrams}} = \frac{|\{ w_{i-1}: c(w_{i-1},w) > 0 \}|}{|\{ (w_{j-1},w_j): c(w_{j-1},w_j) > 0 \}|} \]
+where the numerator counts how many different bigrams does the word create by appearing after another word. The same ratio can be expressed as number of wordtypes preceding $w$ over number of wordtypes preceding all words.
+\[ P_{KN}(w_i \given w_{i-1}) = \frac{\max(c(w_{i-1},w_i) - d, 0)}{c(w_{i-1})} + \lambda(w_{i-1})P_{Continuation}(w) \]
+\textbf{Kneser-Ney smoothing recursive formulation:}
+\[ P_{KN}(w_i \given w^{i-1}_{i-n+1}) = 
+\frac{\max(c_{KN}(w^{i}_{i-n+1}) - d, 0)}{c_{KN}(w^{i-1}_{i-n+1})} + \lambda(w^{i-1}_{i-n+1})P_{KN}(w_i \given w_{i-n+2}^{i-1}) \]
+\[ c_{KN}(\bullet) = \begin{cases} \text{Count}(\bullet) & \text{for the highest order} \\ \text{ContinuationCount}(\bullet) & \text{for the lower orders} \end{cases} \]
+where $\text{ContinuationCount}(\bullet)$ is the number of unique single word contexts for $\bullet$.
+
+\subsection{Comparison}
+n-gram model:
+\ulb
+\item Sparsity problem (Increasing n makes sparsity problems worse. Typically we can’t have n bigger than 5.)
+\item Storage problems (Increasing n or increasing corpus increases model size.)
+\item Surprisingly grammatical but incoherent (We need to consider more than three words at a time if we want to model language well)
+\ule
+Window-based model:
+\ulb
+\item No sparsity problem, don't need to store all observed n-grams
+\item Fixed window is too small, window can be never large enough, enlarging window enlarges $W$
+\item Input words are multiplied by completely different weights in $W$, no symmetry in how the inputs are processed
+\ule
+RNN model:
+\ulb
+\item Can process any length input, model size doesn't increase for longer input
+\item Same weights applied on every step, there is symmetry on how inputs are processed
+\item Computation in step t can (in theory) use information from many steps back
+\item Recurrent computation is slow
+\item In practice, difficult to access information from many steps back
+\ule
+
+\section{PoS Tagging}
+
+\par \textbf{Part-of-speech }tagging is the process of assigning a part-of-speech label to each of a sequence of words.
+\ulb
+\item Open classes: nouns, verb, adjectives, adverbs
+\item Closed classes: prepositions, particles, determiners, conjunctions, pronouns, auxiliary verbs, numerals
+\item An important tagset for English is the 45-tag Penn Treebank tagset, which has been used to label many corpora.
+\ule
+\textbf{Summary:}
+\ulb
+\item Baseline is already $90\%$: tag every word with its most frequent tag, tag unknown words as nouns
+\item The change from generative to discriminative model does not by itself result in great improvement. One profits from models for specifying dependence on overlapping features of the observation such as spelling, suffix analysis, etc.
+\item Higher accuracy of discriminative models comes at the price of much slower training.
+\ule
+
+\subsection{Hidden Markov Models (HMMs)}
+Hidden Markov Models can be formalized as $HMM = (Q,O,A,B,\Pi)$, where
+\ulb
+\item $Q = q_1q_2\dots q_N$: a set of $N$ states (PoS tags)
+\item $A = a_{11} \dots a_{ij} \dots a_{NN}$: a transition probability matrix
+\item $O = o_1o_2\dots o_T$: a sequence of $T$ observations (words)
+\item $B = b_i(o_t)$: a sequence of observation likelihoods, also called emission probabilities
+\item $\Pi = \pi_1,\pi_2,\dots ,\pi_N$: an initial probability distribution (priors)
+\ule
+Two simplifying assumptions:
+\ulb
+\item Markov assumption: $P(q_i \given q_1 \dots q_{i-1}) = P(q_i \given q_{i-1})$
+\item Output independence: $P(o_i \given q_1,\dots ,q_i \dots , q_T, o_1, \dots o_i, \dots ,o_T) = P(o_i \given q_i)$
+\ule
+\textbf{Three fundamental problems:}
+\olb
+\item Likelihood: Given an HMM and an observation sequence, determine the likelihood
+\item Decoding: Given an observation sequence and HMM, discover best hidden state sequence (most probable explanation)
+\item Learning: Given an observation sequence and the set of states in the HMM, learn the HMM parameters $A$ and $B$
+\ole
+\textbf{Likelihood problem:} we cannot compute the total observation likelihood by computing a separate observation likelihood for each hidden state sequence and then summing them. Instead of using such an extremely exponential algorithm, we use an efficient $O(N^2T)$ algorithm called the \textbf{forward algorithm}. The forward algorithm computes the observation probability by summing over the probabilities of all possible hidden state paths that could generate the observation sequence, but it does so efficiently by implicitly folding each of these paths into a single forward trellis.
+\par Each cell of the forward algorithm trellis at $\alpha_t(j)$ represents the probability of being in state $j$ after seeing the first $t$ observations, given the automaton $\lambda$:
+\[ \alpha_t(j) = P(o_1,o_2\dots o_t,q_t = j \given \lambda) = \sum_{i=1}^N \alpha_{t-1}(i)\alpha_{ij}b_j(o_t) \]
+\par \textbf{Decoding problem:} the most common decoding algorithms for HMMs is the \textbf{Viterbi (max-product) algorithm}. Like the forward algorithm, Viterbi is a kind of dynamic programming algorithm that makes uses of a dynamic programming trellis. Note also that the Viterbi algorithm has one component that the forward algorithm doesn't have: backpointers (for the so-called Viterbi backtrace).
+\par The value of each cell is computed by recursively taking the most probable path that could lead us to this cell. Note that we represent the most probable path by taking the maximum over all possible previous state sequences. We compute the Viterbi probability by taking the most probable of the extensions of the paths that lead to the current cell:
+\[ v_t(j) = \max_{q_1,\dots ,q_{t-1}} P(q_1\dots q_{t-1},o_1,o_2\dots o_t, q_t = j \given \lambda) \]
+\[ v_t(j) = \max_{i=1}^n v_{t-1} (i) a_{ij} b_j (o_t) \]
+\par \textbf{Learning problem:} The
+standard algorithm for HMM training is the \textbf{forward-backward (Baum-Welch) algorithm}, a special case of the Expectation-Maximization algorithm. To understand the algorithm, we need to define a useful probability related to the forward probability and called the backward probability. The backward probability $\beta$ is the probability of seeing the observations from time $t+1$ to the end, given that we are in state $i$ at time $t$ (and given the automaton $lambda$):
+\[ \beta_t(i) = P( o_{t+1},o_{t+2},\dots ,o_T \given q_t = i , \lambda) = \sum_{j=1}^N a_{ij} b_j(o_{t+1})\beta_{t+1}(j) \]
+\par For PoS tagging, we don't actually need Baum-Welch or an EM algorithm, because all of your HMM "hidden" states are actually observed (we have all our PoS tags for all our sentences in our dataset). Hence we can use MLE (maximum likelihood estimation) directly. For a comparison, see slide 40 (MLE) vs. slide 41 (EM).
+
+\subsection{Inference in Temporal Models}
+\ulb
+\item \textbf{Filtering} (state estimation): [$P(X_t|e_{1:t})$] the task of computing the belief state ---the posterior distribution over the most recent state--- given all evidence to date, solved by \textbf{Forward} algorithm
+\item \textbf{Prediction}: [$P(X_{t+k}|e_{1:t})$ for $k>0$] the task of computing the posterior distribution over the future state, given all evidence to date, solved by \textbf{Forward} algorithm
+\item \textbf{Smoothing}: [$P(X_{k}|e_{1:t})$ for $0 \leq k < t$] the task of computing the posterior distribution over a past state, given all evidence up to the present, solved by \textbf{Forward-Backward} algorithm
+\item \textbf{Most likely explanation} (decoding): [$\argmax_{X_{1:t}} P(X_{1:t}|e_{1:t}$] the task of finding the sequence of states that is most likely to have generated a given sequence of observations, solved by \textbf{Viterbi} algorithm
+\item \textbf{Learning}: the task of learning transition and sensor models, if not yet known, from observations. Learning requires smoothing, rather than filtering.
+\ule
+\par The posterior distributions computed by smoothing are distributions over single time steps, whereas to find the most likely sequence we must consider joint probabilities over all the time steps. The results can in fact be quite different.
+
+\subsection{Information Extraction}
+\ulb
+\item \textbf{Information extraction} (IE): the task of turning the unstructured information embedded in texts into structured data, for example for populating a relational database to enable further processing
+\item \textbf{Named entity recognition} (NER): the task of finding each mention of a named entity in the text and label its type. Its standard evaluation is per entity, not per token.
+\item Metrics like recall and precision behave a bit funnily for IE/NER when there are boundary errors (which are common).
+\item The \textbf{IOB format} (short for inside, outside, beginning) is a common tagging format for tagging tokens in a chunking task in computational linguistics (ex. named-entity recognition). Another similar format which is widely used is \textbf{IOB2 format}, which is the same as the IOB format except that the B- tag is used in the beginning of every chunk (i.e. all chunks start with the B- tag).
+\item \textbf{Co-reference resolution}: the task of finding all expressions that refer to the same entity in a text.
+\item \textbf{Relationship extraction}: the the task of finding and classifying semantic relationships among text entities.
+\item \textbf{Entity linking} (EL): the task of determining the identity of entities mentioned in text.
+\ule
+
+\section{Vector Semantics}
+\textbf{Also see related section on both CIL and ML4H notes.  Notes on word embeddings are currently collected in a separate file.}
+\par \textbf{Synonymy}: equivalence of near-equivalence in meaning, \textbf{polysemy}: multitude of meanings
+\par \textbf{Raw dot-product}, has a problem as a similarity metric: it favors long vectors. The dot product is higher if a vector is longer, with higher values in each dimension. The simplest way to modify the dot product to normalize for the vector length is to divide the dot product by the lengths of each of the two vectors. This normalized dot product turns out to be the same as the \textbf{cosine} of the angle between the two vectors.
+\par \textbf{Pointwise mutual information} (is one of the most important concepts in NLP. It is a measure of how often two events x and y occur, compared with what we would expect if they were independent:
+$I(x,y) = \log_2 \frac{P(x,y)}{P(x)P(y)}$. It is more common to use \textbf{Positive PMI} (called PPMI) which replaces all negative PMI values with zero.
+\par Distribution similarity: Compare words by comparing their distributions over context words, e.g. KL divergence, Jensen-Shannon divergence
+\par Two words have \textbf{first-order cooccurrence} (sometimes called \textbf{syntagmatic association}) if they are typically nearby each other. Thus wrote is a first-order associate of book or poem. Two words have \textbf{second-order cooccurrence} (sometimes called \textbf{paradigmatic association}) if they have similar neighbors. Thus wrote is a second-order associate of words like said or remarked.
+\par Word embeddings are based on the distributional assumption that words appearing within similar context possess similar meaning.
+\par Word2Vec tends to embed both syntactical and semantic information and it is very effective for the compositionality.
+\par Although pre-trained word vectors work very well in many practical downstream tasks, in some settings it's best to continue to learn (i.e. 'retrain') the word vectors as parameters of our neural network. Explain why retraining the word vectors may hurt our model if our dataset for the specific task is too small: See TV/television/telly example. Word vectors in training data move around; word vectors not in training data don't move around. Destroys structure of word vector space. Could also phrase as an overfitting or generalization problem.
+\par Evaluating word vectors:
+\ulb
+\item Intrinsic: Word Vector Analogies ; Word vector distances and their correlation with human judgments.
+\item Extrinsic: Name entity recognitions: finding a person, location or organization and so on.
+\ule
+ 
+\subsection{skip-gram architecture}
+\par The word2vec family of models, including skip-gram and CBOW, is a popular efficient way to compute dense embeddings.
+\par The \textbf{intuition of word2vec} is that instead of counting how often each word w occurs near, say, apricot, we'll instead train a classifier on a binary prediction task: "Is word w likely to show up near apricot?" We don't actually care about this prediction task; instead we'll take the learned classifier weights as the word embeddings. The revolutionary intuition here is that we can just use running text as implicitly supervised training data for such a classifier.
+Skip-gram intuition:
+\ulb
+\item Treat the target word and a neighboring context word as positive examples.
+\item Randomly sample other words in the lexicon to get negative samples
+\item Use logistic regression to train a classifier to distinguish those two cases
+\item Use the regression weights as the embeddings
+\ule
+\par Softmax in log-bilinear model needs the computation of partition function. Noise contrastive estimation or negative sampling allows an alternative.
+\par The noise words are chosen according to their weighted unigram frequency $p_{\alpha}w = \frac{count(w)^{\alpha}}{\sum_{w'}count(w')^{\alpha}}$, where $\alpha$ is a weight.
+\par For $k=1$ (no oversampling) and $p_n(w_i, w_j)=p(w_i)p(w_j)$ negative sampling yields pointwise mutual information.
+\par word2vec vs count-based methods:
+\ulb
+\pro scale with corpus size; capture complex patterns beyond word similarity
+\con slower than occurrence count based model; efficient usage of statistics
+\ule
+
+\subsection{CBOW vs. Skip-Gram}
+\href{https://stackoverflow.com/questions/38287772/cbow-v-s-skip-gram-why-invert-context-and-target-words#}{\textbf{Reference website}}
+\par In the "skip-gram" mode alternative to "CBOW", rather than averaging the context words, each is used as a pairwise training example. That is, in place of one CBOW example such as [predict 'ate' from average('The', 'cat', 'the', 'mouse')], the network is presented with four skip-gram examples [predict 'ate' from 'The'], [predict 'ate' from 'cat'], [predict 'ate' from 'the'], [predict 'ate' from 'mouse']. (The same random window-reduction occurs, so half the time that would just be two examples, of the nearest words.)
+\ulb
+\item Skip-gram: works well with small amount of the training data, represents well even rare words or phrases.
+\item CBOW: several times faster to train than the skip-gram, slightly better accuracy for the frequent words
+\ule
+
+\section{Sentiment Analysis}
+Sentiment classification related tasks:
+\ulb
+\item Multiple-aspect classification (e.g. restaurant: food, ambience, service, price/value)
+\item Contextual polarity disambiguation: classify marked phrase
+\item Sentiment towards a topic/entity
+\item cf. SemEval, International Workshop on Semantic Evaluation [\href{http://alt.qcri.org/semeval2016/task4/}{link}]
+\ule
+\textbf{Unsupervised Learning of Polarity:} Turney \& Littman bootstrapped a lexicon through seed words of high polarity, computing association via PMI over context windows (size 10) and respectively assigning polarity scores:
+\[ \text{PMI}(w, S) = \log p(w \text{ \& } v \in S) - \log p(w) - \log p(v\in S) \]
+\[ \text{Polarity}(w) = \text{PMI}(w, +) - \text{PMI}(w, -) \]
+They estimate PMI through querying search engine with NEAR operator:
+\[ \text{Polarity} = \log \left( \frac
+{\# hits(w \text{ NEAR } \text{pos}) \cdot \# hits (\text{neg})}{\# hits(w \text{ NEAR } \text{neg}) \cdot \# hits (\text{pos})}
+\right) \]
+Basic equations:
+\[ \text{Pointwise mutual info: } \text{PMI}(w_1,w_2) = \log_2 \frac{P(w_1,w_2)}{P(w_1)P(w_2)} = \log_2 \frac{\# hits(w_1 \text{ NEAR } w_2)}{\# hits(w_1)\# hits(w_2)} \]
+\textbf{Distant Supervision:} automatically generate noisy training data based on strong cues (e.g. hashtags, emoticons) to be used in sentiment classification tasks.
+\par \textbf{Negations} are a major challenge as it can reverse the polarity:
+\ulb
+\item Naive approach: detect negations, determine their scope and reverse sign of polarity
+\item Take grammar more seriously, do syntactic analysis (cf. Stanford Sentiment Tree Bank)
+\item Use sequence based neural networks
+\ule
+
+\subsection{Recursive Neural Networks}
+Recursive neural networks comprise a class of architecture that can operate on structured input. The idea is to have a composition function $g: \R^d \times \R^d \rightarrow \R^d$ that  models the mapping $(\mathbf{x}_{\text{child1}},\mathbf{x}_{\text{child2}}) \mapsto \mathbf{x}_{\text{parent}}$.
+\ulb
+\item Generalized linear model:
+\[ g(\mathbf{x}_l, \mathbf{x}_r) = \tanh \left(
+\mathbf{W}
+\begin{bmatrix}
+\mathbf{x}_l \\ \mathbf{x}_r
+\end{bmatrix}
+\right) \]
+\item Multi-linear (tensor) model:
+\[ g(\mathbf{x}_l, \mathbf{x}_r) = \tanh \left(
+\begin{bmatrix}
+\mathbf{x}_l \\ \mathbf{x}_r
+\end{bmatrix}^T
+\mathbf{V}
+\begin{bmatrix}
+\mathbf{x}_l \\ \mathbf{x}_r
+\end{bmatrix}
++ \mathbf{W}
+\begin{bmatrix}
+\mathbf{x}_l \\ \mathbf{x}_r
+\end{bmatrix}
+\right) \]
+\ule
+
+\subsection{Text Summarization}
+Text summarization is used to generate a short and precise summary of a reference document (e.g. automatic creation of abstract or headline for news article). A simple baseline could be to take the first sentence of a document.
+\par \textbf{Approaches to summarization:}
+\ulb
+\item Extractive Summarization: Select parts (typically sentences) of original text to form a summary.
+\ulb
+\item Easier to solve (reduces to assigning scores to sentences)
+\item Too restrictive (no paraphrasing possible)
+\ule
+\item Abstractive Summarization: Generate new sentences using natural language generation techniques.
+\ulb
+\item Harder to solve and evaluate
+\item More natural summaries through paraphrasing
+\ule
+\ule
+\par Three stages of summarization:
+\ulb
+\item Computing document/sentence representations.
+\item Sentence scoring: how important is each sentence?
+\item Selecting and sequencing sentences (also sentence realization: cleaning up sentences)
+\ule
+\par \textbf{SumBasic} is based on the intuition that summaries should maintain word distribution of the article:
+\olb
+\item Compute the probability distribution over the words $w_i$ appearing in the input, $p(w_i)$ for every $i$; $ p(w_i) = n/N$, where $n$ is the number of times the word appeared in the input, and $N$ is the total number of content word tokens in the input.
+\item For each sentence $S_j$ in the input, assign a weight equal to the average probability of the words in the sentence, i.e.
+\[ weight(S_j) = \sum_{w_i\in S_j} \frac{p(w_i)}{|\{ w_i\given w_i \in S_j \}|} \]
+\item Pick the best scoring sentence that contains the highest probability word.
+\item For each word $w_i$ in the sentence chosen at step 3, update their probability $p_{new}(w_i) = p_{old}(w_i) \cdot p_{old}(w_i)$.
+\item If the desired summary length has not been reached, go back to Step 2.
+\ole
+\par KLSum replaces SumBasic's greedy selection and update driterion. KLSum criterion for summary sentences $S$, collection distribution $P_D$ and summary distribution $P_S$:
+\[ \text{score}(S) = \dkl{P_D}{P_S} \]
+Smoothing of $P_D$ is necessary. Joint sentence selection.
+\par \textbf{Abstractive summarization:}
+\ulb
+\item Seq2seq for abstractive summarization limitations: nonsensical output, factual mistakes, repetitions, non-fluent language, UNKs
+\item Pointer-Generator Network: combine copying (extractive) with generation (abstractive). Rare words are extracted rather than generated. P-Gen more accurate but generates repetitions. 
+\item Reducing repetition with coverage: Coverage = cumulative attention = what has been covered so far. Coverage is used as an extra input to the attention mechanism. Idea is to penalize attending to things that have already been covered.
+\ule
+\par \textbf{ROUGE-N} compares the machine-generated summary to the human-written reference summary and counts co-occurrence of N-grams. It is based on BLEU and recall oriented. It calculates what percentage of the bigrams from the reference summaries $S$ appear in the automatic summary $X$.
+\[ \text{ROUGE-N} = \frac{\sum_{S\in RefSummaries}\sum_{gram_N} \min(Count(gram_N , S), Count(gram_N , X))}{\sum_{S\in RefSummaries}\sum_{gram_N} Count(gram_N , S)} \]
+ROUGEsal: ROUGE + weighted salient terms
+
+\section{Machine Translation}
+\par Human languages vary along: word ordering (SVO, SOV, VSO), morphology (stems, affixes), word boundaries, inferential load, lexical divergences, etc.
+\par \textbf{Three classical approaches for MT:}
+\ulb
+\item Direct: proceed word-by-word, translating each word, reorder if necessary
+\item Transfer: syntactically parse source language, convert the parse tree through rules into parse for target language, generate target sequence
+\item Interlingua: parse source sentence into meaning representation, generate target sequence from meaning
+\ule
+
+\subsection{Statistical Machine Translation}
+Aims to model crucial components as \textbf{faithfulness and fluency}, which decouples to a translation model and a language model:
+\[ \hat{e} = \argmax_e P(e\given f) = \argmax_e \frac{P(f\given e)P(e)}{P(f)} = \argmax_e P(f\given e)P(e) \]
+IBM Models: seminal works in SMT, 5 models of incremental complexity, EM parameter estimation
+\par \textbf{IBM Model 1}, word-based $P(f\given e) = \sum_a p(f,a\given e)$:
+\[ P(f,a\given e) = P(a\given e) P(f\given e,a) = \frac{\epsilon}{(l_e + 1)^{l_f}} \prod_{j=1}^{l_f} t(f_j \given e_{a(j)}) \]
+where $\epsilon$ is a normalization constant (i.e. probability of choosing the length: $P(l_f)$) and $(l_e + 1)^{l_f}$ is the number of possible alignments. It makes the simplifying assumption that each alignment is equally likely. Generative story: choose length of the foreign sentence, choose alignment, choose foreign words from each aligned foreign words. It is limited in the sense that it only allows many-to-one mappings but not one-to-many or many-to-many.
+\par \textbf{EM Algorithm for word alignment:}
+\par If we had Model 1 parameters already, we could re-estimate the parameters by using the parameters to compute the probability of each possible alignment and then using the weighted sum of the alignments to re-estimate the model 1 parameters.
+\olb
+\item Initialize the model typically with uniform distributions (all translations and word alignments are equally likely), input is sentence aligned corpus $(f,e)^N$
+\item Repeat until convergence
+\ulb
+\item E Step: Use the current model to compute the probability for all possible alignments of the training data
+\[ \E[count(f_j, e_i)] = \sum_{(f,e),f_j \in f \wedge e_i \in e} P(a\given f,e) \text{, where } P(a\given f,e) = \frac{P(f,a \given e)}{\sum_a P(f,a\given e)} \]
+\item M Step: Use the alignment probability estimates to re-estimate values for all the parameters
+\[ t(f_j \given e_i) = \frac{\E[count(f_j, e_i)]}{\sum_j \E[count(f_j, e_i)]} \]
+\ule
+\ole
+\par \textbf{Phrase-based translation model:} many-to-many modeling, more context, improve with more data, standard model before NMT. Generative story: group words into phrases, translate each phrase into foreign language, reorder them if necessary. Decoding is NP-complete, so decode through greedy algorithms, beam search.
+\par Learning the translation phrase table:
+\olb
+\item Get a bitext (parallel corpus) and align the sentences ($e-f$ sentence pairs)
+\item Use IBM Model 1 to learn word alignments ($e\rightarrow f$ and $f\rightarrow e$)
+\item Symmetrize the alignments (using heuristics to add points from the union, on top of intersection)
+\item Extract phrases and assign scores (then pruning)
+\[ \phi(\bar{f\given \bar{e}}) = \frac{count(\bar{e},\bar{f})}{\sum_i count(\bar{e},\bar{f_i})} \]
+\ole
+Best translation:
+\[ \hat{e} = \argmax_e \prod_i^l  \phi(\bar{f\given \bar{e}}) d(s_i - e_{i-1}) \prod_i^{|e|} P_{LM} (e_i\given e_1,\dots ,e_{i-1}) \text{, where } d(x) = \alpha^{|x|} \]
+
+\subsection{BLEU}
+BLEU (bilingual evaluation understudy) is an algorithm for evaluating the quality of text which has been machine-translated from one natural language to another.
+\par BLEU's output is always a number between 0 and 1. This value indicates how similar the candidate text is to the reference texts, with values closer to 1 representing more similar texts. Few human translations will attain a score of 1, since this would indicate that the candidate is identical to one of the reference translations. For this reason, it is not necessary to attain a score of 1. Because there are more opportunities to match, adding additional reference translations will increase the BLEU score.
+\par Basic precision measure is not a useful measure, instead BLEU uses a \textbf{modified precision} where the values are clipped w.r.t. maximum word (n-gram) occurrences in the references.
+%\par Let $c$ be the length of the candidate translation and $r$ be the effective reference corpus length.
+%\[ \text{BLEU} = \text{BP} \cdot exp(\sum_{n=1}^N w_n \log p_n) \]
+%\[ \text{BP} = \begin{cases} 1 & \text{if } c > r \\ e^{(1-r/c)} & \text{if } c \leq r \end{cases} \]
+
+\[ \text{BLEU} = \text{BP} \left( \prod_n^4 P_n \right)^{\frac{1}{4}} \text{, where } \text{BP} = \min\left(1, \frac{\text{output-length}}{\text{reference-length}} \right) \]
+
+\[ P_n = \frac
+{\sum\limits_{\mathcal{C}\in\{\text{Candidates}\}}
+\sum\limits_{\text{n-gram}\in\mathcal{C}}
+Count_{clip} (\text{n-gram})}
+{\sum\limits_{\mathcal{C'}\in\{\text{Candidates}\}}
+\sum\limits_{\text{n-gram}'\in\mathcal{C'}}
+Count (\text{n-gram}')} \]
+\par BLEU offers a surface-level evaluation, as it is based on n-grams. If you have a system that is very semantic and it generates high quality translations that express the same translation in very different words, it may get penalized by BLEU. Another problem with BLEU scores is that they tend to favor short translations, which can produce very high precision scores, even using modified precision.
+\par Possible suggestions for BLEU:
+\ulb
+\item Penalize very long outputs as well
+\item Sometimes short outputs might be desirable, e.g. if a language issues the statement using less tokens (words). So there could be a language-specific factor.
+\item Short but expressive output is actually ok. Usually, less common words/n-grams are more expressive, hence we could put more weight on them. This is what an extension of BLEU, the so-called NIST score does.
+\ule
+
+\subsection{Neural Machine Translation}
+Guest lecturer: \textbf{Christian Buck}
+\ulb
+\item Tall towers analogy of Warren Weaver, concept of interlingua
+\item Need a way to model sequences of data as vectors: RNNs
+\item RNNs does not explicitly keep a state, they rather input and output state vectors, applying same matrix multiplications in each step.
+\item Backprop through time leads to vanishing gradients, to which LSTMs are offered as a solution.
+\item Initial LSTM cell was a very lucky choice and it is very hard to improve upon that.
+\item When translating from one language to another one, we would like to condition on the base language. In RNNs, initial state vector would be a good place to condition on prior knowledge.
+\item Encoder-decoder architecture works surprisingly good at producing the vector representations of (presumably long) sentences.
+\item In practice, it works a bit better if you patch this output vector that you got from your encoder to every single decoder input because decoder is not very good at carrying along this information.
+\item Encoder-decoder architecture solves fundamental shortcoming of phrase-based MT: all decisions depend on whole source sentence.
+\item Problem: bottleneck is too small to fit every sentence
+\item Attention: compute weighted average of encoder state, solves bottleneck problem
+\item Bottom-up meta character grouping for sub-word segmentation
+\item Multi-lingual models
+\item Zero-shot translation: Google's NMT model uses an additional "token" at the beginning of the input sentence to specify the required target language to translate to. [\href{https://ai.googleblog.com/2016/11/zero-shot-translation-with-googles.html}{link}]
+\item Self-attention
+\item Multi-headed attention
+\item Non-autoregressive MT
+\ule
+
+\section{Parsing}
+\ulb
+\item Subcategorization: certain kinds of relations between words and phrases (e.g. want to $\checkmark$, find to $\times$)
+\item Constituency: grouping together of words. External, internal evidences, movement...
+\item Formal definition of context-free grammars (CFGs): terminals, non-terminals, rules and start symbol
+\item Agreement: related to inflectional morphology (e.g. he does $\checkmark$, he do $\times$, three cats $\checkmark$, three cat $\times$, gender agreement ...)
+\ule
+\textbf{Ambiguity:} A sentence is structurally ambiguous if the grammar assigns it more than one possible parse. Common kinds of structural ambiguity include PP-attachment, coordination ambiguity and noun-phrase bracketing ambiguity.
+\par PP-attachment: compare "I saw the burglar with a telescope" (VP) with "I saw the burglar with a gun" (NP).
+\par Coordination: "old men" and women vs old "men and women"
+\par CFGs can be used for:
+\ulb
+\item Generation: of strings in the language
+\item Accepting: identify strings in the language
+\item Parsing: associating syntactic trees to strings in the language
+\ule
+CFG has a problem in the sense that if  they are not specific enough they can overgenerate (e.g. via subcategorization, agreement). We can patch the grammar to make it more specific but it explodes the grammar, creates sparsity and it is not an elegant solution.
+\par Two search strategies:
+\ulb
+\item Top-down (goal-directed, emphasizes prior knowledge): 
+Never wastes time exploring trees that cannot result in an $S$ etc. but spends effort on trees not consistent with the input.
+\item Bottom-up: data-directed, emphasizes empirical data
+\ule
+Exponential number of possible parse trees, so we need efficient algorithms.
+
+\subsection{CKY Algorithm}
+\par CKY (Cocke-Kasami-Younger) algorithm needs the grammar to be in Chomsky Normal Form: $A \rightarrow B\;C$, $A \rightarrow w$. Any CFG can be rewritten into CNF automatically, without any loss in expressiveness. Goal is to avoid redoing work via DP. DP parsing is $O(n^3|G|)$. Solve ambiguity (due to multiple hypotheses) through priors and context.
+\par \textbf{Conversion to CNF:}
+\olb
+\item START: Eliminate the start symbol from right-hand sides (create a new start symbol)
+\item TERM: Eliminate rules with nonsolitary terminals (convert terminals within rules to dummy non-terminals)
+\item BIN: Eliminate right-hand sides with more than 2 nonterminals (binarize rules)
+\item DEL: Eliminate $\varepsilon$-rules (null production)
+\item UNIT: Eliminate unit rules (unit-productions)
+\ole
+\textbf{On its complexity, from stackoverflow:}
+\par The runtime of CYK depends on the length of the longest production rule, since the algorithm considers all possible ways of decomposing a string into k parts for a production of length $k$. This means that the runtime per phase is $O(n^k)$, where $k$ is the length of the longest production. Since there are $O(n)$ phases, the runtime of CYK on a grammar with maximum production length $k$ is $O(n^{k+1})$.
+\par CYK will work correctly on grammars that aren't in CNF, but the runtime may not end up being cubic in the length of the string. The CNF requirement just forces $k = 2$ and therefore guarantees an $O(n^3)$ overall runtime.
+
+\subsection{PCFGs and Statistical Parsing}
+Probabilistic context-free grammars (PCFGs): a probabilistic augmentation of context-free grammars in which each rule is associated with a probability, which comes as useful for disambiguation. They can be parsed with probabilistic CKY algorithm.
+\par A PCFG is said to be consistent if the sum of the probabilities of all sentences in the language equals 1. Certain kinds of recursive rules cause a grammar to be inconsistent by causing infinitely looping derivations for some sentences.
+\par Parameter estimation:
+\ulb
+\item Supervised estimation via treebank:
+\[ P(\alpha\rightarrow\beta\given\alpha) = \frac{\text{Count}(\alpha\rightarrow\beta)}{\sum_{\gamma}\text{Count}(\alpha\rightarrow\gamma)} = \frac{\text{Count}(\alpha\rightarrow\beta)}{\text{Count}(\alpha)} \]
+\item Inside-outside algorithm: use a non-probabilistic parse to estimate probabilistic parser to estimate probabilities, weight counts and repeat (special case of EM)
+\ule
+PCFG independence assumptions miss structural dependencies between rules (rules and probabilities ignore context, solutions: non-terminal splitting, split-and-merge) and they lack of sensitivity to lexical dependencies (e.g. depending on how the probabilities are set, a PCFG will always either prefer NP attachment or VP attachment).
+\par The Collins Model 1 introduces the idea of a generative story for each of the lexicalized rules given some independency assumptions. Rather than computing MLE probabilites for each of the rules (this is not feasible as the rules are very specic due to the lexicalization process and it would be impossible to have good counts), the probability of a rule is obtained as the product of smaller independent probabilities.
+
+\subsection{Dependency parsing}
+Dependency grammars: based on lexical relations rather than constituent ones, syntactic structure of a sentence is described purely in terms of words and binary semantic or syntactic relations between these words. They have strong predictive parsing power and can handle languages with relatively free word order.
+\par The importance of this distinction is that if one acknowledges the initial subject-predicate division in syntax is real, then one is likely to go down the path of phrase structure grammar, while if one rejects this division, then one must consider the verb as the root of all structure, and so go down the path of dependency grammar.
+\par Constituency parsing outputs a parse tree (a derivation from the CFG) whereas a dependency parser outputs a directed tree (no grammar). However the differences, functional relations can be extracted from CFG trees and phrases identifiable in DGs.
+\par \textbf{Advantages:} no grammar, faster parsing, free word order languages, easier to use, easier to generate data in multiple languages.
+\par \textbf{Free word order:} A phrase-structure grammar would need a separate rule for each possible place in the parse tree where a specific phrase type could occur. A dependency-based approach would just have one link type representing this particular relation. Thus, a dependency grammar approach abstracts away from word-order information, representing only the information that is necessary for the parse.
+\par Three restrictions that apply to dependency trees:
+\olb
+\item There is a single designated root node that has no incoming arcs.
+\item With the exception of the root node, each vertex has exactly one incoming arc.
+\item There is a unique path from the root node to each vertex in V .
+\ole
+\par The arrow connects a head (governor, superior, regent) with a dependent (modifier, inferior, subordinate).
+\par \textbf{Projectivity: } An arc from a head to a dependent is said to be projective if there is a path from the head to every word that lies between the head and the dependent in the sentence. A dependency tree is then said to be projective if all the arcs that make it up are projective. In other words, a dependency tree is projective if it can be drawn with no crossing edges.
+\par The reason why projectivity is important is twofold:
+\olb
+\item Transition-based approaches can only produce projective trees. Hence, any sentences with nonprojective parses will necessarily contain some errors.
+\item The most widely used English dependency treebanks were automatically derived from phrase-structure treebanks through the use of head-finding rules. Trees generated in such a fashion are guaranteed to be projective.
+\ole
+\par We can use graph-based or transition-based parsers. On one hand transition-based approaches are fast (linear times) but by design they are greedy (however this can be mitigated with techniques such as beam search). On the other hand, graph-based approaches are slower but they do an exhaustive search.
+\par A \textbf{shift-reduce parser} is a class of efficient, table-driven bottom-up parsing methods for computer languages and other notations formally defined by a grammar. A Shift step advances in the input stream by one symbol. That shifted symbol becomes a new single-node parse tree. A Reduce step applies a completed grammar rule to some of the recent parse trees, joining them together as one tree with a new root symbol.
+\par The result of the algorithm will depend on how we (greedily) chose the action at time t. The choice can be anything, from totally random, to having an "oracle", to having some ML model tell us which action to pick.
+\par Disadvantages of dependency parsing:
+\ulb
+\item Graph-based dependency parsers are slower (quadratic time instead of linear in the length of the sentence).
+\item Graph-based dependency parsers are not constrained to produce valid parse trees, so they may be more likely to produce invalid ones.
+\item Graph-based dependency parsers make parsing decisions independently so they can't use features based on previous parsing decisions.
+\ule
+
+\section{Question Answering}
+\textbf{Paradigms for QA:}
+\ulb
+\item IR-based (Information Retrieval) approaches: answer a question by finding a short text, on the web or other corpus, that contains the answer
+\olb
+\item Question processing: detect question type, answer type, focus, relations and formulate queries to send to a search engine
+\item Passage retrieval: retrieve ranked documents and break into suitable passages, then rank
+\item Answer processing: extract candidate answers, then rank them using evidence from the text and external sources
+\ole
+\item Knowledge-based approaches: build a semantic representation of the query (e.g. times, dates, locations, entities, numeric quantities) and map from this semantics to query structured data or resources:
+\ulb
+\item Geospatial databases
+\item Ontologies (Wikipedia infoboxes, dbPedia, WordNet, Yago)
+\item Restaurant review sources and reservation services
+\item Scientific databases
+\ule
+\item Hybrid approaches: e.g. use IR to find candidates and use knowledges-based approaches to rank them
+\ule
+\par \textbf{Factoid questions} are questions with simple answers with single phrase or identity
+\par \textbf{Question headword} is the the headword of the first noun phrase after the wh-word.
+\par A \textbf{triplestore} or RDF store is a purpose-built database for the storage and retrieval of triples through semantic queries. A triple is a data entity composed of subject-predicate-object, like "Bob is 35" or "Bob knows Fred".
+\par \textbf{Active question reformulation:} We propose an agent that sits between the user and a black box QA system and learns to reformulate questions to elicit the best possible answers. The agent probes the system with, potentially many, natural language reformulations of an initial question and aggregates the returned evidence to yield the best answer. For example, reformulate through a seq2seq and aggregate using a CNN.
+\par Common evaluation metrics are accuracy (does answer match the gold-labeled answer?) and mean reciprocal rank:
+\ulb
+\item Return a ranked list of $N$ candidate answers
+\item Score is $1/\text{rank}$ of the first right answer
+\[ \text{MRR} = \frac{\sum_{i=1}^N \frac{1}{\text{rank}_i}}{N} \]
+\ule
+Answering complex questions:
+\ulb
+\item The (bottom-up) snippet method: find a set of relevant documents, extract informative sentences from the documents (using tf-idf, MMR), order and modify the sentences into an answer
+\item The (top-down) information extraction method: build specific answerers for different question types (e.g. definition questions, biography questions, certain medical questions)
+\ule
+
+\section{Appendix}
+\subsection{tf-idf}
+Term frequency (tf) weighting schemes:
+\ulb
+\item binary: $0,1$
+\item raw count: $f_{t,d}$
+\item term frequency: $f_{t,d} / \sum_{t'\in d}f_{t',d} $
+\item log normalization: $\log(1+ f_{t,d})$
+\item double normalization K: $K + (1-K) \frac{f_{t,d}}{\max_{\{t'\in d\}}f_{t',d}}$
+\ule
+Inverse document frequency (idf) weighting schemes:
+\ulb
+\item unary: $1$
+\item inverse document frequency: $\log\frac{N}{n_t}$
+\item inverse document frequency smooth: $\log(\frac{N}{1+n_t})$
+\item inverse document frequency max: $\log(\frac{\max_{\{t'\in d\}}n_{t'}}{1+n_t})$
+\item probabilistic inverse document frequency: $\log\frac{N-n_t}{n_t}$
+\ule
+
+\subsection{BERT}
+\par \textbf{BERT} (Bidirectional Encoder Representations from Transformers) is a method of pre-training language representations, meaning that we train a general-purpose "language understanding" model on a large text corpus (like Wikipedia), and then use that model for downstream NLP tasks that we care about (like question answering). BERT outperforms previous methods because it is the first \textbf{unsupervised, deeply bidirectional} system for pre-training NLP.
+\par \textbf{Fine-tuning is inexpensive.} All of the results in the paper can be replicated in at most 1 hour on a single Cloud TPU, or a few hours on a GPU, starting from the exact same pre-trained model. 
+\par History of Contextual Representations:
+\ulb
+\item Semi-Supervised Sequence Learning: Train LSTM Language Model, Fine-tune on Classification Task
+\item ELMo: Deep Contextual Word Embeddings: Train Separate Left-to-Right and Right-to-Left LMs, Apply as "Pre-trained Embeddings"
+\item Improving Language Understanding by Generative Pre-Training: Train Deep (12-layer) Transformer LM, Fine-tune on Classification Task
+\ule
+\par \textbf{Masked LM}: Mask out k\% of the input words (so that they cannot see themselves), and then predict the masked words. Masked LM takes slightly longer to converge because we only predict 15\% instead of 100\%, but absolute results are much better almost immediately. Too mach masking reduces context and too little masking is too expensive to train (15\% is empirical).
+\par Input Representation: Each token is sum of three embeddings (token + segment + position), tokenization is done to level word-piece (think of somewhere between word and character level)
+\par Empirical advantages of \textbf{Transformer vs. LSTM}:
+\ulb
+\item Self-attention == no locality bias, Long-distance context has "equal opportunity"
+\item Single multiplication per layer == efficiency on TPU, Effective batch size is number of words, not sequences
+\ule
+\par The model must be learning more than "contextual embeddings", predicting missing words (or next words) requires learning many types of language understanding features (syntax, semantics, pragmatics, coreference, etc).
+
+\subsection{Conversational Agents}
+\par In time series analysis, \textbf{dynamic time warping (DTW)} is one of the algorithms for measuring similarity between two temporal sequences, which may vary in speed. For instance, similarities in walking could be detected using DTW, even if one person was walking faster than the other, or if there were accelerations and decelerations during the course of an observation.
+
+\end{document}
