@@ -1,0 +1,51 @@
+\section{Basics}
+$f(x) = \frac{1}{\sqrt{2\pi \sigma^2}} e^{- \frac{1}{2} \frac{(x-\mu)^2}{\sigma^2}},\quad \mathcal{N}(x|\mu, \sigma)$\\
+$f(x) = \frac{1}{\sqrt{(2\pi)^d\det\Sigma}} e^{- \frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu)},\quad \mathcal{N}(x|\mu, \Sigma)$\\
+Condition number: $\kappa(A)=\frac{\sigma_{max}(A)}{\sigma_{min}(A)}$ \\
+f(x) on a: $f(a)+\tfrac{f'(a)}{1!}(x-a) + \tfrac{f''(a)}{2!}(x-a)^2 + ...$ \\
+Binomial: $f(k,n,p) {=} Pr(X=k) {=} \binom nk p^k (1{-}p)^{n{-}k}$ \\
+$\ln(p(x|\mu, \Sigma)) {=} {-}\tfrac{d}{2}\ln(2\pi) {-} \tfrac{\ln|\Sigma|}{2} {-} \tfrac{1}{2}(x{-}\mu)^T\Sigma(x{-}\mu)$ \\
+$X {\sim} \mathcal{N}(\mu,\Sigma)$, $Y{=}A{+}BX \Rightarrow Y{\sim}\mathcal{N}(A{+}B\mu,B\Sigma B^T)$ //
+General p-norm: $\norm{ x }_p = (\sum_{i=1}^n |x_i|^p)^{1/p}$
+
+\subsection*{Moments}
+\begin{inparaitem}[\color{red}\textbullet]
+% Variance
+\item $Var[X]=\int_x(x-\mu)^2p(x) dx$ \\
+\item $Var[X]=E[(X-E[X])^2]=E[X^2]-E[X]^2$ \\
+\item $Var[X{+}Y]=Var[X]{+}Var[Y]{+}2Cov[X,Y]$ \\
+% Covariance
+\item $Cov[X,Y] = E[(X - E[X])(Y - E[Y])]$ \\
+\item $Cov[aX,bY]{=}abCov[X,Y]$ \\
+\item $K_{\bm{XY}} = cov(X,Y) = E[XY^T] - E[X]E[Y^T]$
+\end{inparaitem}
+\subsection*{Calculus}
+\begin{inparaitem}[\color{red}\textbullet]
+	\item Part.: $\int u(x)v'(x) dx = u(x)v(x) - \int v(x)u'(x) dx$\\
+	\item Chain r.: $\frac{f(y)}{g(x)} = \frac{dz}{dx} \Big|_{x=x_0}= \frac{dz}{dy}\Big|_{z=g(x_0)}\cdot \frac{dy}{dx} \Big|_{x=x_0}$ \\
+	%\item $g_x(1) = g_x(0) + g'_x(0) + \int_{0}^{1} g_x''(s)(1-s) ds$ \\
+	%\item $g(\mathbf{w}+\delta) - g(\mathbf{w}) = %\int_{\mathbf{w}}^{\mathbf{w+\delta}} \nabla g(\mathbf{u}) du = (\int_{0}^{1} \nabla g(\mathbf{w}+t\delta)dt) \cdot \delta$\\
+	\item $\frac{\partial}{\partial \mathbf{x}}(\mathbf{b}^\top \mathbf{x}) = \frac{\partial}{\partial \mathbf{x}}(\mathbf{x}^\top \mathbf{b}) = \mathbf{b}$
+	\item $\frac{\partial}{\partial \mathbf{x}}(\mathbf{x}^\top \mathbf{x}) = 2\mathbf{x}$ \\
+	\item $\frac{\partial}{\partial \mathbf{x}}(\mathbf{x}^\top \mathbf{A}\mathbf{x}) = (\mathbf{A}^\top + \mathbf{A})\mathbf{x} \stackrel{\text{\tiny A sym.}}{=} 2\mathbf{A}\mathbf{x}$ \\
+	\item $\frac{\partial}{\partial \mathbf{x}}(\mathbf{b}^\top \mathbf{A}\mathbf{x}) = \mathbf{A}^\top \mathbf{b}$
+	\item $\frac{\partial}{\partial \mathbf{X}}(\mathbf{c}^\top \mathbf{X} \mathbf{b}) = \mathbf{c}\mathbf{b}^\top$ \\
+	\item $\frac{\partial}{\partial \mathbf{X}}(\mathbf{c}^\top \mathbf{X}^\top \mathbf{b}) = \mathbf{b}\mathbf{c}^\top$
+	\item $\frac{\partial}{\partial \mathbf{x}}(\| \mathbf{x}-\mathbf{b} \|_2) = \frac{\mathbf{x}-\mathbf{b}}{\|\mathbf{x}-\mathbf{b}\|_2}$ \\
+	\item $\frac{\partial}{\partial \mathbf{x}}(\|\mathbf{x}\|^2_2) = \frac{\partial}{\partial \mathbf{x}} (\|\mathbf{x}^\top \mathbf{x}\|_2) = 2\mathbf{x}$
+	\item $\frac{\partial}{\partial \mathbf{X}}(\|\mathbf{X}\|_F^2) = 2\mathbf{X}$ \\
+	\item $x^T A x = Tr(x^T A x) = Tr(x x^T A) = Tr(A x x^T)$ \\
+	\item $\tfrac{\partial}{\partial A} Tr(AB) {=} B^T$
+	\item $\frac{\partial}{\partial A} log|A| {=} A^{-T}$ \\
+	\item $\text{sigmoid}(x) = \sigma(x) = \frac{1}{1+\exp(-x)}$ \\
+	\item $\nabla \text{sigmoid}(x) = \text{sigmoid}(x)(1-\text{sigmoid}(x))$ \\
+	\item $\nabla \text{tanh}(x) = 1-\text{tanh}^2(x)$ 
+	\item $tanhx {=} \frac{sinhx}{coshx} {=} \frac{e^{x}-e^{-x}}{e^{x} + e^{x}}$
+\end{inparaitem}
+\subsection*{Probability / Statistics}
+\begin{compactdesc}
+	\item[Bayes' Rule]$ P(Y|X) = \frac{P(X|Y)P(Y)}{P(X)}\frac{P(X|Y)P(Y)}{\sum\limits^k_{i=1}P(X|Y_i)P(Y_i)}$\\
+	\item[MGF] $\mathbf{M}_X(t)=\mathbb{E}[e^{\mathbf{t}^T \mathbf{X}}]$, $\mathbf{X}=(X_1,.., X_n) $
+\end{compactdesc}
+\subsection*{Jensen's inequality}
+	X:random variable \& $\varphi$:convex function $\rightarrow$ $\varphi(\mathbb{E}[X]) \leq \mathbb{E}[\varphi(X)]$

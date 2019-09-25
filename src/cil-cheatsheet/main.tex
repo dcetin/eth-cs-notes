@@ -1,0 +1,87 @@
+\documentclass[11pt,landscape,a4paper,standalone,fleqn]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{tikz}
+\usetikzlibrary{shapes,positioning,arrows,fit,calc,graphs,graphs.standard}
+\usepackage[nosf]{kpfonts}
+% \usepackage{setspace}
+\usepackage[t1]{sourcesanspro}
+%\usepackage[letterspace=-100]{microtype}
+%\usepackage[lf]{MyriadPro}
+%\usepackage[lf,minionint]{MinionPro}
+\usepackage{multicol}
+\usepackage{parskip}
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\usepackage{wrapfig}
+\usepackage{paralist}
+\usepackage[top=0mm,bottom=1mm,left=1mm,right=1mm]{geometry}
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{microtype}
+\usepackage{mathptmx}
+
+% math helpers
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\let\bar\overline
+
+\definecolor{myblue}{cmyk}{1,0.72,0,0.38}
+\definecolor{myorange}{cmyk}{0,0.5,1,0}
+
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\everymath\expandafter{\the\everymath \color{myblue}}
+\everydisplay\expandafter{\the\everydisplay \color{myblue}}
+
+\renewcommand{\baselinestretch}{.8}
+\pagestyle{empty}
+
+\global\mdfdefinestyle{header}{%
+linecolor=gray,linewidth=1pt,%
+leftmargin=0mm,rightmargin=0mm,skipbelow=0mm,skipabove=0mm,
+}
+
+\newcommand{\header}{
+\begin{mdframed}[style=header]
+\footnotesize
+\sffamily
+Oliver Blaser and Joël Schneider\\~page~\thepage~of~2
+\end{mdframed}
+}
+
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+                                {.2ex}%
+                                {.2ex}%x
+                                {\color{myorange}\sffamily\small\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{1}{0mm}%
+                                {.2ex}%
+                                {.2ex}%x
+                                {\sffamily\bfseries}}
+
+
+\makeatother
+\setlength{\parindent}{0pt}
+
+\begin{document}
+\small
+\begin{multicols*}{4}
+\setcounter{section}{-1}
+\input{Essentials}
+\input{PCA}
+\input{SVD}
+\input{Reconstruction}
+\input{NMF}
+\input{WordEmbedding}
+\input{DataClusteringMixture}
+% \input{KMeans}
+% \input{GaussianMixtureModel}
+\input{SparseCoding}
+\input{DictionaryLearning}
+\input{NeuralNetworks}
+\input{DeepUnsuperviseLearning}
+% \input{RobustPCA}
+\end{multicols*}
+\end{document}

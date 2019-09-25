@@ -1,0 +1,92 @@
+% -*- root: Main.tex -*-
+\section{Regression}
+%\subsection*{Linear Regression}
+%Error: $\hat{R}(w) = \sum_{i=1}^n (y_i - w^Tx_i)^2 = ||Xw-y||^2_2$\\
+%Closed form: $w^*=(X^T X)^{-1} X^T y$\\
+%Gradient: $\nabla_w \hat{R}(w) = 2X^T (Xw-y)$
+\subsection*{Estimation}
+Consistency: $\hat{\theta_n} \stackrel{\text{\tiny P}}{\rightarrow} \theta$,
+i.e. $\forall\epsilon P \{|\hat{\theta_n}-\theta| \geq\epsilon\} \stackrel{\tiny n \to\infty}{\longrightarrow} 0 $\\
+Asymptotic normality: $\sqrt{N}(\theta - \hat{\theta_n}) \to \mathcal{N}(0, J^{-1}IJ^{-1})$ \\
+Asymptotic efficiency: $\hat{\theta_n}$ has the smallest variance among all possible consistent estimators (for large enough N), i.e. $\lim_{n\to\infty} (V[\hat{\theta_n}]I(\theta))^{-1} = 1$
+	$\hat{\theta}_{MAP} := \argmax_\theta \left \{ \sum_{i=1}^n log(p(x_i | \theta) + log(p(\theta)) \right\}$
+\subsection*{Rao-Cramer}
+$\Lambda = \frac{\partial \log \mathbb{P}(x|\theta )}{\partial x}$ (score function), $E[\Lambda ]=0$\\
+Fisher information: $I= \mathbb{V}[\Lambda]$ \\
+$J= E[\Lambda^{2}]= -E[\frac{\partial^2 \log \mathbb{P}(x|\theta ) }{\partial \theta \partial \theta ^{T}}]= -E[\frac{\partial \Lambda}{\partial \theta}]$ \\
+variance of an estimator is bounded from below by the inverse of Fisher information \\
+MSE bound: $E[(\hat \theta -\theta )^{2}] \geq \frac{[1 + b^{\prime} (\theta)]^{2}}{n E[\Lambda ^{2}]} + b_{\hat \theta}^{2}$ \\
+Biased estimators: $var(\hat{\theta}) \geq \frac{[1 + b^{\prime}(\theta)]^2}{I(\theta)}$ \\
+Efficiency: $e(\hat{\theta}) = \frac{I(\theta)^{-1}}{var(\hat{\theta})} \leq 1$ \\
+Cauchy-Schwarz: $|E(X,Y)|^2 \leq E(X)^2 E(Y)^2$ 
+
+\subsection*{Regularized regression}
+Error: $\hat{R}(w) = \sum \limits_{i=1}^n (y_i - w^Tx_i)^2 + \lambda ||w||_2^2$ (Ridge) \\
+Closed form: $w^*=(X^T X + \lambda I)^{-1} X^T y$ (Ridge)\\
+%Grad: $\nabla_w \hat{R}(w) = -2 \sum_{i=1}^n (y_i-w^T x_i) \cdot x_i + 2 \lambda w$\\
+{\small{} Shrinkage:} $Xw^*{=}\sum_{j=1}^{d} u_j\frac{\sigma_j^2}{\sigma_j^2+\lambda}u_j^Ty$, $X{=}U\Sigma V^T$ 
+LASSO: $w^* = \underset{w}{\operatorname{argmin}} \sum \limits_{i=1}^n (y_i - w^Tx_i)^2 + \lambda ||w||_1$
+
+\subsection*{Bayesian linear regression}
+	Model:  \= $y = X^T \beta + \epsilon$, with $\epsilon \sim
+	\mathcal{N}(\epsilon | 0, \sigma^2 I)$ or 
+	\> $P(y | X, \beta, \sigma) = \mathcal{N}(y | X^T \beta , \sigma^2 I)$ 
+	$P(\beta | \Lambda) = \mathcal{N} (\beta | 0, \Lambda^{-1})$, Post: $P(\beta | X, y, \Lambda) = \mathcal{N}(\beta | \mu_\beta, \Sigma_\beta)$ 
+	$\mu_\beta = (X^T X + \sigma^2 \Lambda)^{-1} X^T y$, $\Sigma_\beta = \sigma^2(X^T X + \sigma^2 \Lambda)^{-1}$ 
+	Prediction: \> $y_{new} = \hat{\beta}_{\scaleto{MAP}{4pt}}^T x_{new} = \mu_\beta ^T x_{new}$ 
+	$P(y_{new} | x_{new}, X, y, \beta) 
+	= \mathcal{N}(\mu_\beta ^T x_{new}, \sigma^2 + x_{new}^T \Sigma_\beta x_{new})$
+
+\subsection*{Combination of Regression Models:}
+$\text{bias}[\hat{f}(x)] = \frac{1}{B} \sum_{i=1}^{B} \text{bias}[\hat{f}_i(x)]$\\
+Var$[\hat{f}(x)] = \frac{1}{B^2}\sum_i$ Var$[\hat{f}_i(x)]
++ \frac{1}{B^2}\sum_{i,j:i\neq j}$ Cov$[\hat{f}_i(x), \hat{f}_j(x)] \approx \frac{\sigma^2}{B}$
+% \subsection*{Smoothing Splines}
+% $RSS(f,\lambda) = \sum\limits_{i=1}^n (y_i - f(x_i))^2 + \lambda  \int (f''(x))^2dx$\\
+
+\subsection*{RSS Estimator}
+$\hat{\beta} \sim \mathcal{N}(\beta,(X^TX)^{-1}\sigma^2)$.
+%\textbf{Unbiasedness}: $\mathbb{E}[\hat{\beta}] = \mathbb{E}[(X^TX)^{-1}X^Ty] = (X^TX)^{-1}X^T\mathbb{E}[X\beta+\epsilon] = (X^TX)^{-1}(X^TX)\beta+X^T\mathbb{E}[\epsilon] = \beta + 0$
+%\textbf{Variance of} $a^T\hat{\beta}$: $\mathbb{V}(a^T(X^TX)^{-1}X^T(X\beta + \epsilon)) = \mathbb{V}(a^T\beta) + \mathbb{E}(a^T(X^TX)^{-1}X^T\epsilon\epsilon^TX(X^TX)^{-1}a) = \sigma^2 a^T(X^TX)^{-1}a$ 
+
+%\subsection*{Gauss-Markov Theorem}
+%For any linear estimator $\widetilde{\theta}=c^T\mathbf{y}$ that is unbiased for $a^T\beta$ it holds: $\mathbb{V}(a^T\hat{\beta}) \leq \mathbb{V}(c^T\mathbf{y})$\\
+%Proof: Let $c^T \mathbf{y} = a^T\hat{\beta} + a^T\mathbf{D}\mathbf{y} = a^T((\mathbf{X^TX})^{-1}\mathbf{X}^T + \mathbf{D})\mathbf{y}$ be an unbiased estimator of $a^T \beta$; then it follow $a^T \mathbf{DX}\beta = 0$ which implies $\mathbf{DX} = 0$.\\
+%$\mathbb{V}(c^T \mathbf{y}) = \mathbb{E}[(c^T \mathbf{y})^2]-\mathbb{E}(c^T \mathbf{y})^2 = c^T(\mathbb{E}\mathbf{y}\mathbf{y}^T - \mathbb{E}\mathbf{y}\mathbb{E}\mathbf{y}^T)c = \sigma^2 c^T c $
+%= $\sigma^2 \big( a^T ((\mathbf{X^T X})^{-1}\mathbf{X}^T + \mathbf{D}) (\mathbf{X}(\mathbf{X^T X})^{-1}+\mathbf{D}^T)a \big )$\\
+%= $\sigma^2 \big( a^T (\mathbf{X^T X})^{-1}a +\mathbf{DD^T}a \big )$
+%= $\mathbb{V}(a^T\hat{\beta}) + a^T \mathbf{DD^T}a \geq \mathbb{V}(a^T\hat{\beta})$ (note: $\mathbf{DD^T}$ is PSD)
+
+\subsection*{Bias vs. Variance}
+\setlength{\mathindent}{0cm}
+$
+\E_D\E_{X,Y}\left(\hat{f}(X)-Y\right)^2 = \\
+\E_D\E_X\left(\hat{f}(X) - \E(Y|X)\right)^2 + \E_{X,Y}\left(Y - \E(Y|X)\right)^2\\
+= \E_X \E_D\left(\hat{f}(X) - \E_D(\hat{f}(X))\right)^2 \text{(variance)}\\
++ \E_X\left(\E_D(\hat{f}(X)) - \E(Y|X)\right)^2 \text{(bias}^2)\\
++ \E_{X,Y}\left(Y - \E(Y|X)\right)^2 \text{(noise)}
+$\\
+%High bias can cause an algorithm to miss the relevant relations between features and target outputs (underfitting).\\
+%High variance can cause overfitting: modeling the random noise in the training data, rather than the intended outputs.
+
+% \subsection*{Gradient Descent}
+% 1. Start arbitrary $w_o \in \mathbb{R}$\\
+% 2. For $i$ do $w_{t+1} = w_t - \eta_t \nabla \hat{R}(w_t)$
+
+%\subsection*{Curse of Dimensionality}
+%To obtain a reliable estimate at a given regularity, the required number of samples grows exponentially with the dimension of the sample space.
+
+% \subsection*{Expected Error}
+% For generalization, minimize the expected error
+% $R(w) = \int P(x,y) (y-w^Tx)^2 \partial x \partial y$\\
+% $= \mathbb{E}_{x,y}[(y-w^Tx)^2]$
+
+
+\subsection*{Ridge Parametric to nonparametric}
+Ansatz: $w=\sum_i \alpha_i x$\\
+$w^* = \underset{w}{\operatorname{argmin}} \sum_i (w^Tx_i-y_i)^2 + \lambda ||w||_2^2$ = \\
+${\operatorname{argmin}}_{\alpha_{1:n}} \sum_{i=1}^n (\sum_{j=1}^n \alpha_j x_j^T x_i - y_i)^2 + \lambda \sum_i \sum_j \alpha_i \alpha_j (x_i^T x_j)$\\
+$= {\operatorname{argmin}}_{\alpha_{1:n}} \sum_{i=1}^n (\alpha^T K_i - y_i)^2 + \lambda \alpha^T K \alpha$\\
+$= {\operatorname{argmin}}_{\alpha} ||\alpha^T K -y||_2^2 + \lambda \alpha^T K \alpha$\\
+Closed form: $\alpha^* = (K+\lambda I)^{-1} y$\\
+Prediction: $y^*= w^{*T} x = \sum_{i=1}^n \alpha_i^* k(x_i,x)$

@@ -1,0 +1,38 @@
+% !TEX root = Main.tex
+\section{Gaussian Mixture Models (GMM)}
+For GMM let $\boldsymbol{\theta}_k = (\boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)$; $p_{\theta_k}(\mathbf{x}) = \mathcal{N}(\mathbf{x} | \boldsymbol{\mu}_k, \Sigma_k)$\\
+\textbf{Mixture Models:} $p_\theta(\mathbf{x}) = \sum_{k=1}^K \pi_k p_{\theta_k}(\mathbf{x})$\\
+\textbf{Assignment variable (generative model):} $z_{ij} \in \{0, 1\}$, $\sum_{j=1}^k z_{ij} = 1$\\
+$\operatorname{Pr}(z_k = 1) = \pi_k \Leftrightarrow p(\mathbf{z}) = \prod_{k=1}^K \pi_k^{z_k}$\\
+\textbf{Complete data distribution:}\\
+$p_\theta(\mathbf{x}, \mathbf{z}) = \prod_{k=1}^K \left( \boldsymbol{\pi}_k p_{\theta_k}(\mathbf{x})\right)^{z_k}$\\
+\textbf{Posterior Probabilities:} $\\\operatorname{Pr}(z_k = 1 | \mathbf{x}) = \frac{\operatorname{Pr}(z_k = 1) p(\mathbf{x} | z_k = 1)}{\sum_{l=1}^K \operatorname{Pr}(z_l = 1) p(\mathbf{x} | z_l = 1)} = \frac{\boldsymbol{\pi}_k p_{\theta_k}(\mathbf{x})}{\sum_{l=1}^K \boldsymbol{\pi}_l p_{\theta_l}(\mathbf{x})}$
+\textbf{Likelihood of observed data $\mathbf{X}$:}\\
+$p_\theta(\mathbf{X}) = \prod_{n=1}^N p_\theta(\mathbf{x}_n) = \prod_{n=1}^N \left(\sum_{k=1}^K \pi_k p_{\theta_k}(\mathbf{x}_n)\right)$
+\textbf{Max. Likelihood Estimation (MLE):}\\
+$\argmax_\theta\sum_{n=1}^N \log \left( \sum_{k=1}^K \pi_k p_{\theta_k}(\mathbf{x}_n)\right)\\
+\ge \sum_{n=1^N} \sum_{k=1}^K{q_k[\log p_{\theta_k}(\mathbf{x}_n) + \log \pi_k - \log q_k]}$\\
+with $\sum_{k=1}^K{q_k} = 1$ by Jensen Inequality.
+
+\subsection*{Generative Model}
+1. sample cluster index $j \sim Categorical(\pi)$\\
+2. given $j$, sample data $x \sim \text{Normal}(\mu_j, \Sigma_j)$
+
+
+\subsection*{Expectation-Maximization (EM) for GMM}
+\textbf{E-Step: }\\
+Pr$[z_{k,n} = 1 | \mathbf{x}_n] = q_{k, n} = \frac{\boldsymbol{\pi}_k^{(t-1)} \mathcal{N}(\mathbf{x}_n | \boldsymbol{\mu}_k^{(t-1)}, \boldsymbol{\Sigma}_k^{(t-1)})}{\sum_{j=1}^K \boldsymbol{\pi}_j^{(t-1)} \mathcal{N}(\mathbf{x}_n | \boldsymbol{\mu}_j^{(t-1)}, \boldsymbol{\Sigma}_j^{(t-1)})}$\\
+\textbf{M-Step: } $\boldsymbol{\mu}_k^{(t)} := \frac{\sum_{n=1}^N q_{k,n} \mathbf{x}_n}{\sum_{n=1}^N q_{k,n}}$
+$, \boldsymbol{\pi}_k^{(t)} := \frac{1}{N} \sum_{n=1}^N q_{k,n}$\\
+$\Sigma_k^{(t)} = \frac{\sum_{n=1}^N q_{k, n} (\mathbf{x}_n - \boldsymbol{\mu}_k^{(t)})(\mathbf{x}_n - \boldsymbol{\mu}_k^{(t)})^\top}{\sum_{n=1}^N q_{k,n}}$
+
+\subsection*{Discussion K-means vs. EM}
+hard assignment vs soft. sherical clusters shapes vs covariance matrix. fast vs slow and more iteration. K-means can be used as initialization for EM.\\
+K-means os a special case of GMM with covariances $\Sigma_j = \sigma^2 * I$. in the limit of $\sigma \rightarrow 0$, recover K-means.
+
+\subsection*{Model Order Selection (AIC / BIC for GMM)}
+Trade-off between data fit (i.e. likelihood $p(\mathbf{X} | \theta)$) and complexity (i.e. \# of free parameters $\kappa(\cdot)$). For choosing $K$:\\
+\textbf{Akaike Information Criterion}: $\operatorname{AIC}(\theta | \mathbf{X}) = -\log p_\theta(\mathbf{X}) + \kappa(\theta)$\\
+\textbf{Bayesian Information Criterion}: $\operatorname{BIC}(\theta | \mathbf{X}) = -\log p_\theta(\mathbf{X}) + \frac{1}{2} \kappa(\theta) \log N$\\
+\# of free params, fixed covariance matrix: $\kappa(\theta) = K \cdot D + (K - 1)$ ($K$: \# clusters, $D$: $\mathsf{dim}\text{(data)}=\mathsf{dim}(\mu_i)$, $K-1$: \# free clusters, full covariance matrix: $\kappa(\theta) = K(D + \frac{D(D+1)}{2}) + (K - 1)$.\\
+Compare AIC/BIC for different $K$ -- the smaller the better. BIC penalizes complexity more.

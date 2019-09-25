@@ -1,0 +1,40 @@
+% !TEX root = Main.tex
+\section{Matrix Approximation \& Reconstruction}
+
+$\min_{rank(B)=k}[\sum_{(i,j)\in I}{(a_{ij}-b_{ij})^2}], I=\{(i,j): \mathit{ob.}\}$
+\subsection*{Alternating Least Squares}
+$f(U,v_i) = \sum_{(i,j)\in I} (a_{i,j} - \langle u_j, v_i \rangle)^2$\\
+$f(u_i,V) = \sum_{(i,j)\in I} (a_{i,j} - \langle u_j, v_i \rangle)^2$\\
+Convex when fixed one.
+
+% YZF: delete?
+% \subsection*{Coordinate Descent}
+% 1. init: $\mathbf{x}^{(0)} \in \mathbb{R}^D$\\
+% 2. for $t = 0 \ \text{to} \ \mathit{maxIter}$:\\
+% 3. sample $d \in_{u.a.r.} \{1, \ldots, D\}$\\
+% 4. $u^\star = \argmin_{u \in \mathbb{R}} f(x_1^{(t)}, .., x_{d-1}^{(t)}, u, x_{d+1}^{(t)}, .., x_D^{(t)})$\\
+% 5. $\mathbf{x}_d^{(t+1)} = u^\star$ and $\mathbf{x}_i^{(t+1)} = \mathbf{x}_i^{(t)}$ for $i \neq d$
+
+% \subsection*{Projected Gradient Descent (Constrained Opt.)}
+% minimize $f(x)$, $x \in Q$ (constraint).\\
+% \textbf{Project} $x$ onto $Q$: $P_Q(\mathbf{x}) = \argmin_{y \in Q} \|\mathbf{y} - \mathbf{x}\|$,\\
+% \textbf{Update}: $\mathbf{x}^{(t+1)} = P_Q[\mathbf{x}^{(t)} - \gamma \nabla f(\mathbf{x}^{(t)})]$,\\
+% $\mathbf{x}^{(t+1)}$ is unique if $Q$ convex.
+
+
+% YZF: need revising
+\subsection*{Convex Optimization}
+Def.: $\{(x,t)|x \in dom f, f(x) \leq t\}$, $f : \mathbb{R}^D \rightarrow \mathbb{R}$ is convex, if $dom\ f$ is a convex set, and if $\forall \mathbf{x}, \mathbf{y} \in dom\ f$, and $\forall \alpha\in[0,1]$: $f(\alpha \mathbf{x} + (1 - \alpha)\mathbf{y}) \leq \alpha f(\mathbf{x}) + (1-\alpha)f(\mathbf{y})$. 
+Convex $\iff$ Hessian p.s.d $\iff$ local=global \\
+Positive semi-definite: all principal minors (same-indexed rows and columns) $\geq$ 0\\
+Positive definite: leading principal minors $>$ 0
+
+\subsection*{Convex Relaxation}
+Replace non-convex rank constraints by convex norm constraints (superset). Then project optimum back (hopefully still optimal).\\
+$\min_{\mathbf{B}\in P_k}{\|\mathbf{A-B}\|^2_G}, P_k=\{\mathbf{B}:\|\mathbf{B}\|_{*}\leq k\}\supseteq Q_k=\{\mathbf{B}:\mathit{rank}(\mathbf{B})\leq k\}$ (in fact tightest convex lowerbound $\mathit{rank}(\mathbf{B})\geq \|\mathbf{B}\|_{*}, for \|\mathbf{B}\|_2 \leq 1$)
+
+\subsection*{SVD Thresholding}
+% TBA
+$\mathbf{B}^{*}=\mathit{shrink}_\tau(\mathbf{A})=\argmin_{\mathbf{B}}{\{\|\mathbf{A-B}\|^2_F + \tau\|\mathbf{B}\|_{*}\}}$\\
+Then with SVD $\mathbf{A=UDV_T}, \mathbf{D}=\mathit{diag}(\sigma_i)$, holds $\mathbf{B^*=UD_\tau V^T, D_\tau} = \mathit{diag}(\max\{0,\sigma_i - \tau\})$ \\
+Iteration: $\mathbf{B}_{t+1}=\mathbf{B}_t + \eta_t \Pi(\mathbf{A} - \mathit{shrink}_\tau(\mathbf{B}_t))$

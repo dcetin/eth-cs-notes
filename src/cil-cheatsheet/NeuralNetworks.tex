@@ -1,0 +1,22 @@
+\section{Neural Networks}
+% only CNN?
+\textbf{Activation:} scalar, non-linear $\tanh(x)=\frac{e^x-e^{-x}}{e^x+e^{-x}}$\\ sigmoid: $\sigma(x)= \frac{1}{1+e^{-x}},\sigma^{'}(x)=\sigma(x)(1-\sigma(x))$\\
+\textbf{Neurons}: $F_\sigma(\mathbf{x};\mathbf{w}) = \sigma(w_0 + \sum_{i=1}^M{x_iw_i}) = \sigma(w^{\top}x)$\\ \textbf{Output}: linear regression $\mathbf{y} = \mathbf{W}^L\mathbf{x}^{L-1}$, binary (logistic) $y_1 = \text{P}[Y=1|\mathbf{x}] = \frac{1}{1 + \exp(-\mathbf{w}^T \mathbf{x}^{L-1})}$, multiclass (soft-max) $y_k = \text{P}[Y=k|\mathbf{x}]= \frac{\exp( \mathbf{w}_k^T\mathbf{x}^{L-1})}{\sum_{m=1}^{K}{\exp(\mathbf{w}^T\mathbf{x}^{L-1})}}$.
+\textbf{Loss} $l(y, \hat{y})$: squared loss $\frac{1}{2}(y - \hat{y})^2$, cross-entropy loss $-y \log \hat{y} - (1-y)\log(1-\hat{y})$ $0\leq\hat{y}\leq1, y \in \{0,1\}$ or $y \in [0,1]$. \textbf{layer-wise:} $\mathbf{x}^{l} = \sigma^{l}\left(\mathbb{W}^{\left(l\right)}\mathbf{x}^{\left(l-1\right)}\right)$.
+
+\subsection*{Backpropagation}
+Layer-to-layer Jacobian: $\mathbf{x}$ = prev. layer activation, $\mathbf{x^+}$ = next layer activation. Jacobian matrix $\mathbf{J}$ = $J_{ij}$ of mapping $\mathbf{x}\rightarrow\mathbf{x^+}$, $\mathbf{x_i^+} = \sigma(\mathbf{w}_i^\top\mathbf{x})$, $J_{ij} = \frac{\partial \mathbf{x_i^+}}{\partial \mathbf{x}_j} = w_{ij}\cdot\sigma'(\mathbf{w}_i^\top\mathbf{x})$. Across multiple layers: $\frac{\partial\mathbf{x}^{(l)}}{\partial\mathbf{x}^{(l-n)}} = \mathbf{J}^{(l)}\cdot\frac{\partial\mathbf{x}^{(l-1)}}{\partial\mathbf{x}^{(l-n)}}=\mathbf{J}^{(l)}\cdot\mathbf{J}^{(l-1)}\cdots\mathbf{J}^{(l-n+1)}$ and then back prop. $ \nabla_{\mathbf{x}^{(l)}}^\top\ell=\nabla_{\mathbf{y}}^\top\ell\cdot\mathbf{J}^{(L)}\cdots\mathbf{J}^{(l+1)}$\\
+Weights: $\frac{\partial l}{\partial w_{ij}^{(l)}} = \frac{\partial l}{\partial x_i^{(l)}}\frac{\partial x_i^{(l)}}{\partial w_{ij}^{(l)}}$, $\frac{\partial x_i^{l}}{\partial w_{ij}^{l}} = \sigma'([\mathbf{w}_i^{(l)}]^T \mathbf{x}^{(l-1)})\cdot x_j^{(l-1)}$ (sensitivity of down-stream unit $\cdot$ activation of up-stream unit)<
+
+\subsection*{Gradient Descent (or Deepest Descent)}
+\textbf{Gradient}: $\nabla f(\mathbf{x}) := \left( \frac{\partial f(\mathbf{x})}{\partial \mathbf{x}_1}, \ldots, \frac{\partial f(\mathbf{x})}{\partial \mathbf{x}_D} \right)^\top$
+
+$\mathbf{x}^{(t+1)} = \mathbf{x}^{(t)} - \gamma \nabla f(\mathbf{x}^{(t)})$, usually $\gamma \approx \frac{1}{t}$
+
+\textbf{SGD} Assume additive obj. $f(x) = \frac{1}{N}\sum_{n=1}^{N}f_n(x)$\\
+sample $n \in_{u.a.r.} \{1, \ldots, N\}$, then\\
+$\mathbf{x}^{(t+1)} = \mathbf{x}^{(t)} - \gamma \nabla f_n(\mathbf{x}^{(t)})$, typically  $\gamma \approx \frac{1}{t}$.
+
+\subsection*{Neural Networks for Images (CNN)}
+$F_{n,m}(\mathbf{x};\mathbf{w}) = \sigma(b + \sum_{k=-2}^2\sum_{l=-2}^{2}{w_{k,l}x_{n+k,m+l}})$. 
+% Unsure $(I \star K)_{i',j'} = \sum_{-k \leq i}\sum_{j \leq k} (I)_{i'+i,j'+j}(K)_{-i,-j}$ with odd numbered kernel K with dim $(k-1)/2 x (k-1)/2$

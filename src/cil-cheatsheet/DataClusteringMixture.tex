@@ -1,0 +1,51 @@
+\section{Data Clustering \& Mixture Models}
+\textbf{K-means} \textbf{Target:} $\min_{\mathbf{U}, \mathbf{Z}} J(\mathbf{U}, \mathbf{Z}) = \|\mathbf{X} - \mathbf{U} \mathbf{Z}\|_F^2$\\
+$= \sum_{n=1}^N \sum_{k=1}^K \mathbf{z}_{k,n} \|\mathbf{x}_n - \mathbf{u}_k\|_2^2$\\
+1. \textbf{Initiate:} choose $K$ centroids $\mathbf{U} = [\mathbf{u}_1, \ldots, \mathbf{u}_K]$\\
+2. \textbf{Cluster Assign:} data points to clusters. $k^\star(\mathbf{x}_n) = \argmin_k \{ \|\mathbf{x}_n - \mathbf{u}_k\|_2 \}$ returns cluster $k^\star$, whose centroid $\mathbf{u}_{k^\star}$ is closest to data point $\mathbf{x}_n$. Set $\mathbf{z}_{k^\star,n} = 1$, and for $ l \neq k^\star~ \mathbf{z}_{l,n}=0$.\\
+3. \textbf{Update centroids}: $\mathbf{u}_k = \frac{\sum_{n=1}^N z_{k,n} \mathbf{x}_n}{\sum_{n=1}^N z_{k,n}}$.\\
+4. Repeat until $\|\mathbf{Z} - \mathbf{Z}^\text{new}\|_0 = \|\mathbf{Z} - \mathbf{Z}^\text{new}\|^2_F = 0$.\\
+Computational cost: $O(k\cdot n \cdot d)$
+Prior: $p(z) = 1/K$
+\par \textbf{K-Means++:}
+1. Choose centroid $\mathbf{u}_1$ randomly from datapoints $S$
+2. For $x \in S$, calculate min. squared distance $d_m(x)$ to existing centroids $c_1,...,c_m$
+3. Add new centroid $c_{m+1}$, choosen randomly from $S$ with prob. $p(x) = d_m(x) / \sum_{z \in S} d_m(z)$
+4. Repeat until $K$ centroids choosen $\rightarrow$ proceed with K-means
+\subsection*{Gaussian Mixture Models (GMM)}
+Gaussian $p(x)=\frac{1}{\sqrt{2\pi}\sigma}\mathit{exp}(-\frac{(x-\mu)^2}{2\sigma^2})$
+Multivariate $p(x;\mu;\Sigma)=\frac{1}{|\Sigma|^{\frac{1}{2}}(2\pi)^{\frac{D}{2}}}\mathit{exp}[-\frac{1}{2}(x-\mu)^T \Sigma^{-1} (x-\mu)]$ \\
+For GMM let $\boldsymbol{\theta}_k = (\boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)$; $p_{\theta_k}(\mathbf{x}) = \mathcal{N}(\mathbf{x} | \boldsymbol{\mu}_k, \Sigma_k)$\\
+\textbf{Mixture Models:} $p_\theta(\mathbf{x}) = \sum_{k=1}^K \pi_k p_{\theta_k}(\mathbf{x})$\\
+\textbf{Assignment variable (generative model):} $z_{ij} \in \{0, 1\}$, $\sum_{j=1}^k z_{ij} = 1$\\
+Prior: $\operatorname{Pr}(z_k = 1) = \pi_k \Leftrightarrow p(\mathbf{z}) = \prod_{k=1}^K \pi_k^{z_k}$\\
+\textbf{Complete data distribution:}\\
+$p_\theta(\mathbf{x}, \mathbf{z}) = \prod_{k=1}^K \left( \boldsymbol{\pi}_k p_{\theta_k}(\mathbf{x})\right)^{z_k}$\\
+\textbf{Posterior Probabilities:} $\\\operatorname{Pr}(z_k = 1 | \mathbf{x}) = \frac{\operatorname{Pr}(z_k = 1) p(\mathbf{x} | z_k = 1)}{\sum_{l=1}^K \operatorname{Pr}(z_l = 1) p(\mathbf{x} | z_l = 1)} = \frac{\boldsymbol{\pi}_k p_{\theta_k}(\mathbf{x})}{\sum_{l=1}^K \boldsymbol{\pi}_l p_{\theta_l}(\mathbf{x})}$\\
+$\text{posterior} P(A|B)=\frac{\text{prior} P(A)\times\text{likelihood} P(B|A)}{\text{evidence} P(B)}$\\
+\textbf{Likelihood of observed data $\mathbf{X}$:}\\
+$p_\theta(\mathbf{X}) = \prod_{n=1}^N p_\theta(\mathbf{x}_n) = \prod_{n=1}^N \left(\sum_{k=1}^K \pi_k p_{\theta_k}(\mathbf{x}_n)\right)$
+\textbf{Max. Likelihood Estimation (MLE):}\\
+$\argmax_\theta\sum_{n=1}^N \log \left( \sum_{k=1}^K \pi_k p_{\theta_k}(\mathbf{x}_n)\right)\\
+\ge \sum_{n=1^N} \sum_{k=1}^K{q_k[\log p_{\theta_k}(\mathbf{x}_n) + \log \pi_k - \log q_k]}$\\
+with $\sum_{k=1}^K{q_k} = 1$ by Jensen Inequality.
+
+\textbf{Generative Model}\\
+1. sample cluster index $j \sim Categorical(\pi)$\\
+2. given $j$, sample data $x \sim \text{Normal}(\mu_j, \Sigma_j)$
+
+\textbf{Expectation-Maximization (EM) for GMM}\\
+E-Step:
+Pr$[z_{k,n} = 1 | \mathbf{x}_n] = q_{k, n} = \frac{\boldsymbol{\pi}_k^{(t-1)} \mathcal{N}(\mathbf{x}_n | \boldsymbol{\mu}_k^{(t-1)}, \boldsymbol{\Sigma}_k^{(t-1)})}{\sum_{j=1}^K \boldsymbol{\pi}_j^{(t-1)} \mathcal{N}(\mathbf{x}_n | \boldsymbol{\mu}_j^{(t-1)}, \boldsymbol{\Sigma}_j^{(t-1)})}$\\
+M-Step: 
+$\boldsymbol{\mu}_k^{(t)} := \frac{\sum_{n=1}^N q_{k,n} \mathbf{x}_n}{\sum_{n=1}^N q_{k,n}}$
+$, \boldsymbol{\pi}_k^{(t)} := \frac{1}{N} \sum_{n=1}^N q_{k,n}$\\
+$\Sigma_k^{(t)} = \frac{\sum_{n=1}^N q_{k, n} (\mathbf{x}_n - \boldsymbol{\mu}_k^{(t)})(\mathbf{x}_n - \boldsymbol{\mu}_k^{(t)})^\top}{\sum_{n=1}^N q_{k,n}}$
+
+\textbf{K-means vs. EM} hard vs soft; spherical clusters vs covariance matrix; fast and cheap vs slow and more iteration; K-means can be used as init. for EM. K-means as a special case of GMM with covariances $\Sigma_j = \sigma^2 I$. limit of $\sigma \rightarrow 0$ is K-means (hard asgmts).
+
+\textbf{Model Order Selection (AIC / BIC for GMM)}\\
+Trade-off between data fit (i.e. likelihood $p(\mathbf{X} | \theta)$) and complexity (i.e. \# of free parameters $\kappa(\cdot)$). For choosing $K$: $\operatorname{AIC}(\theta | \mathbf{X}) = -\log p_\theta(\mathbf{X}) + \kappa(\theta)$\\
+$\operatorname{BIC}(\theta | \mathbf{X}) = -\log p_\theta(\mathbf{X}) + \frac{1}{2} \kappa(\theta) \log N$\\
+\# of free params, fixed covariance matrix: $\kappa(\theta) = K \cdot D + (K - 1)$ ($K$: \# clusters, $D$: $\mathsf{dim}\text{(data)}=\mathsf{dim}(\mu_i)$, $K-1$: $\pi$ of \# free clusters), full covariance matrix: $\kappa(\theta) = K(D + \frac{D(D+1)}{2}) + (K - 1)$.\\
+Compare AIC/BIC for different $K$ -- the smaller the better. BIC penalizes complexity more.

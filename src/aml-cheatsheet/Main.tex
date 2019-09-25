@@ -1,0 +1,325 @@
+\documentclass[11pt,landscape,a4paper,fleqn]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{tikz}
+\usepackage{bbm}
+\usetikzlibrary{shapes,positioning,arrows,fit,calc,graphs,graphs.standard}
+\usepackage[nosf]{kpfonts}
+\usepackage[t1]{sourcesanspro}
+%\usepackage[lf]{MyriadPro}
+%\usepackage[lf,minionint]{MinionPro}
+\usepackage{multicol}
+\usepackage{wrapfig}
+\usepackage[top=5mm,bottom=5mm,left=5mm,right=5mm]{geometry}
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{microtype}
+\usepackage{paralist} % for compacter lists
+\usepackage{bm}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+
+\let\bar\overline
+
+\definecolor{myblue}{cmyk}{1,.72,0,.38}
+\definecolor{myorange}{cmyk}{0.9,0,1,0.2}
+\definecolor{myred}{cmyk}{0.7,0,0.7,0.6}
+
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\everymath\expandafter{\the\everymath \color{myblue}}
+%\everydisplay\expandafter{\the\everydisplay \color{myblue}}
+
+\renewcommand{\baselinestretch}{.8}
+\pagestyle{empty}
+
+\global\mdfdefinestyle{header}{%
+linecolor=gray,linewidth=1pt,%
+leftmargin=0mm,rightmargin=0mm,skipbelow=0mm,skipabove=0mm,
+}
+
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+                                {.2ex}%
+                                {.2ex}%x
+	                                {\color{myred}\sffamily\small\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{1}{0mm}%
+                                {.2ex}%
+                                {.2ex}%x
+                                {\color{myorange}\sffamily\bfseries}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{1}{0mm}%
+	{.2ex}%
+	{.2ex}%x
+	{\sffamily\bfseries}}
+
+
+% math helpers
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\E}{\mathbb{E}}
+
+\makeatother
+\setlength{\parindent}{0pt}
+
+\newcommand{\imp}[1]{\boxed{\boldsymbol{#1}}} % Einrahmung und Fett
+\newcommand{\w}{\omega}
+\newcommand{\ud}{\,\mathrm{d}}% Differential
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\X}{\mathcal{X}}
+
+% compress equations
+%\medmuskip=0mu
+%\thinmuskip=0mu
+%\thickmuskip=0mu
+
+\begin{document}
+\small
+\begin{multicols*}{4}
+	\input{0Basics}
+	\input{1Regression.tex}
+	\input{2GaussianProcess.tex}
+%	\input{2Bayes.tex}
+	\input{3NumericalEstimatesMethods.tex}
+	\input{4Classification.tex}
+	\input{5DesignLinearDiscriminant.tex}
+	\input{6SupportVectorMachine.tex}
+	\input{7NonLinearSVM.tex}
+	\input{8Ensemble.tex}
+%	\input{8Unsupervised.tex}
+	\input{9MixtureModel.tex}
+%	\input{10TimeSeries.tex}
+	\input{10NeuralNet.tex}
+	
+% -*- root: Main.tex -*-
+
+% -- PAC LEARNING
+\section{PAC Learning}
+Empirical error: $\hat{\mathcal{R}}_n(c) = \tfrac{1}{n}\sum_{i=1}^n \mathbb{I}_{\{c(x_i)\neq y\}}$ \\
+Expected error: $\mathcal{R}(c) = P\{c(x)\neq y\}$ \\
+ERM: $\hat{c}_n^* = \argmin_{c\in\mathcal{C}} \hat{\mathcal{R}}_n(c)$ \\
+opt: $c^* \in \min_{c\in\mathcal{C}} \mathcal{R}(c)$, $|\mathcal{C}|$ finite \\
+Generalization error: $\mathcal{R}(\hat{c}_n^*) = P\{ \hat{c}_n^*(x)\neq y \}$ \\
+VC ineq.: $\mathcal{R}(\hat{c}_n^*) - \inf\limits_{c\in\mathcal{C}}\mathcal{R}(c) \leq 2\sup\limits_{c\in\mathcal{C}}|\hat{\mathcal{R}}_n(c) - \mathcal{R}(c)|$ \\ 
+$P\{ \mathcal{R}(\hat{c}_n^*) - \mathcal{R}(c^*) > \epsilon \} \leq P\{ \sup\limits_{c\in\mathcal{C}}|\hat{\mathcal{R}}_n(c) - \mathcal{R}(c)| > \frac{\epsilon}{2} \} \\
+\leq 2|\mathcal{C}| exp(-2n\epsilon ^2 /4) \leq 8s(\mathcal{A},n)exp(-n\epsilon ^{2} /32)$ and $s(\mathcal{A},n) \leq n^{\mathcal{V_{\mathcal{A}}}}$ \\
+Markov ineq: $P\{X\geq\epsilon\} \leq \tfrac{\mathbb{E}[X]}{\epsilon}$ (for nonneg. X) \\
+Boole's inequality: $P(\bigcup_i A_i) \leq \sum_i P(A_i)$ \\
+Hoeffding's lemma: $\mathbb{E}[e^{sX}] \leq exp(\tfrac{1}{8}s^2(b-a)^2)$ where $\mathbb{E}[X]=0$, $P(X\in[a,b])=1$ \\
+Hoeffding's: $P\{S_n {-} \mathbb{E}[S_n] {\geq} t\} {\leq} exp({-} \frac{2t^2}{\sum_i (b_i - a_i)^2})$ \\
+Normalized: $P\{\widetilde{S}_n {-} \mathbb{E}[\widetilde{S}_n] {\geq} \epsilon\} {\leq} exp({-} \frac{2n^2 \epsilon ^2}{\sum_i (b_i {-} a_i)^2})$ \\
+{\small Error bound: $P\{ \sup\limits_{c\in\mathcal{C}}|\hat{\mathcal{R}}_n(c) - \mathcal{R}(c)| > \epsilon \} \leq 2|\mathcal{C}| exp(-2n\epsilon ^2)$} \\
+The $\mathcal{VC}$ dimension of a model $f$ is the maximum number of points that can be arranged so that $f$ shatters them.
+
+% -- DIRICHLET PROCESS
+\section{Nonparametric Bayesian methods}
+$Dir(x|\alpha) = \frac{1}{B(\alpha)} \prod_{k=1}^n x_k^{a_k - 1}$, $B(\alpha) = \frac{\prod_{k=1}^n \Gamma(\alpha_k)}{\Gamma(\sum_{k=1}^n \alpha_k)}$ \\
+$\mathbb{E}[1] = \sum_{i=1}^N \frac{\alpha}{\alpha + i} \sim(\alpha log(N))$ \\
+de Finetti: $p(X_1, ..., X_n) {=} \int (\prod_{i=1}^n p(x_i|G))dP(G)$ \\
+\[ p(z_i=k|\bm{z}_{-i},\bm{x},\alpha,\bm{\mu}) = \begin{cases}
+      \frac{N_{k,-i}}{\alpha + N - 1} p(x_i|\bm{x}_{-i,k},\bm{\mu}) \;\exists k \\
+      \frac{\alpha}{\alpha + N - 1} p(x_i|\bm{\mu}) \;\text{otherwise}
+   \end{cases}
+\]
+DP generative model: \\
+\begin{inparaitem}[\color{red}\textbullet]
+\item Centers of the clusters: $\mu_k \sim \mathcal{N}(\mu_0, \sigma_0)$ \\
+\item Prob.s of clusters: $\rho = (\rho_1, \rho_2) \sim  GEM(\alpha)$ \\
+\item Assignments to clusters: $z_i \sim Categorical(\rho)$ \\
+\item Coordinates of data points: $\mathcal{N}(\mu_{z_i}, \sigma)$
+\end{inparaitem}
+
+%\newpage
+
+%\subsection{Misc}
+%\textbf{Lagrangian:} $f(x,y) s.t. g(x,y) = c$\\
+%$
+%\mathcal{L}(x, y, \gamma) = f(x,y) - \gamma ( g(x,y)-c)
+%$\\
+%\textbf{Parametric learning}: model is parametrized with a finite set of parameters, like linear regression, linear SVM, etc. \\
+%\textbf{Nonparametric learning}: models grow in complexity with quantity of data: kernel SVM, k-NN, etc.\\
+%\textbf{Empirical variance}: Look for dense and sparse regions. Regularize so that sparse regions are not contained (decr. variance). Measure by Variance CV of some classifiers.
+
+% -*- root: Main.tex -*-
+%\section{Ensemble Methods}
+%Use combination of simple hypotheses (weak learners) to create one strong learner.
+%
+%strong learners: minimum error is below some $\delta < 0.5$
+%
+%weak learner: maximum error is below $0.5$
+%\begin{equation}
+%f(x) = \sum_{i=1}^{n} \beta_i h_i(x)
+%\end{equation}
+%\textbf{Boosting}: train on all data, but reweigh misclassified samples higher.
+%
+%\subsubsection*{Decision Trees}
+%\textbf{Stumps}: partition linearly along 1 axis\\
+%$h(x) = sign(a x_i - t)$\\
+%\textbf{Decision Tree}: recursive tree of stumps, leaves have labels. To train, either label if leaf's data is pure enough, or split data based on score.
+%
+%
+%\subsubsection*{Ada Boost}
+%Effectively minimize exponential loss.\\
+%$f^*(x) = \argmin_{f\in F} \sum_{i=1}^{n} \exp(-y_i f(x_i))$\\
+%Train $m$ weak learners, greedily selecting each one
+%\begin{equation*}
+%(\beta_i, h_i) = \argmin_{\beta,h} \sum_{i=1}^{n} \exp(-y_i (f_{i-1} (x_j) + \beta h(x_j)))
+%\end{equation*}
+%\begin{compactdesc}
+%	\item $c_b(x) \text { trained with } w_i$ \\
+%	\item $\epsilon_b = \sum\limits_i^n \frac{w_i^b}{\sum\limits_i^n w_i^b} I_{c(x_i) \neq y_i} $\\
+%	\item $\alpha_b = log \frac{1-\epsilon_b}{\epsilon_b} $\\
+%	\item $w^{b+1}_i = w^b_i \cdot exp(\alpha_b I_{y_i \neq c_b(x_i)})$
+%\end{compactdesc}
+%
+%Exponential loss function
+%
+%Additive logistic regression
+%
+%Bayesian approached (assumes posteriors)
+%
+%Newtonlike updates (Gradient Descent)
+%
+%If previous classifier bad, next has heigh weight
+
+\section{Generative Methods}
+%\textbf{Discriminative} - estimate $P(y|x)$ - conditional. \\
+%\textbf{Generative} - estimate $P(y, x)$ - joint, model data generation.
+
+\subsubsection*{Naive Bayes}
+All features independent.\\
+$
+P(y|x) = \frac{1}{Z} P(y) P(x|y), Z = \sum_{y} P(y) P(x|y) \\
+y = \argmax_{y'} P(y'|x) = \argmax_{y'} \hat{P}(y') \prod_{i=1}^{d} \hat{P}(x_i|y')
+$ \\
+\textbf{Discriminant Function}\\
+$
+f(x) = \log(\frac{P(y=1|x)}{P(y==1|x)}), y=sign(f(x))
+$
+
+%\subsubsection*{Fischer's Linear Discriminant Analysis (LDA)}
+%Idea: project high dimensional data on one axis.
+%
+%Complexity: $\mathcal{O}(d^2n$ with $d$ number of classifiers\\
+%$c=2, p=0.5, \hat{\Sigma}_- = \hat{\Sigma}_+ = \hat{\Sigma} \\
+%y = sign(w^\top x + w_0) \\
+%w = \hat{\Sigma}^{-1}(\hat{\mu}_+ - \hat{\mu}_-) \\
+%w_0 = \frac{1}{2}(\hat{\mu}_-^\top \Sigma^{-1} \hat{\mu}_- - \hat{\mu}_+^\top \Sigma^{-1} \hat{\mu}_+)
+%$
+
+% -*- root: Main.tex -*-
+%\section{Unsupervised Learning}
+%\subsection*{Parzen}
+%$
+%\hat{p}_n = \frac{1}{n} \sum\limits_{i=1}^n \frac{1}{V_n} \phi(\frac{x-x_i}{h_n})
+%$
+%where $\int \phi(x)dx = 1$
+%\subsection*{K-NN}
+%$
+%\hat{p}_n = \frac{1}{V_k} \text{ volume with } k \text{ neighbours}
+%$
+%\subsection*{K-means}
+%$
+%L(\mu) = \sum_{i=1}^{n} \min_{j\in\{1...k\}} \|x_i - \mu_y \|_2^2
+%$\\
+%
+%\textbf{Lloyd's Heuristic}:\\ (1) assign each $x_i$ to closest cluster \\
+%(2) recalculate means of clusters.
+%
+%Iteration over (repeated till stable):
+%\begin{compactdesc}
+%	\item[Step 1:]$ \text{argmin}_c ||x-\mu_c||^2$ \\
+%	\item[Step 2:]$ \mu_\alpha = \frac{1}{n_\alpha} \sum \vec{x}$
+%\end{compactdesc}
+
+% -*- root: Main.tex -*-
+\section{Neural Networks}
+\subsection*{Learning features}
+Parameterize the feature maps and optimize over the parameters:\\
+$w^* = \underset{w, \Theta}{\operatorname{argmin}} \sum_{i=1}^n l(y_i, \sum_{j=1}^m w_j \Phi(x_i, \Theta_j))$
+
+
+%\section{Hidden-Markov model}
+%State only depends on previous state.
+%
+%Always given: sequence of symbols $\vec{s} = \{s_1,s_2, \ldots s_n\}$
+%\subsection*{Evaluation (Forward \& Backward)}
+%Known: $a_{ij}, e_k(s_t)$
+%
+%Wanted: $P(X = x_i | S = s_t)$
+%\begin{eqnarray}
+%f_l (s_{t+1}) = e_l(s_{t+1}) \sum f_k(s_t) a_{kl} \\
+%b_l(s_t) = e_l(s_t) \sum b_k(s_{t+1}) a_{lk} \\
+%P(\vec{s}) = \sum_k f_k(s_n) a_k \cdot \text{ end} \\
+%P(x_{l,t} | \vec{s}) = \frac{f_l(s_t) b_l(s_t)}{P(\vec{s})}
+%\end{eqnarray}
+%Complexity in time: $\mathcal{O}(|S|^2 \cdot T)$
+
+%\subsection{Learning (Baum-Welch)}
+%Known: only sequence and sequence space $\Theta$
+%
+%Wanted: $a_{ij}, e_k(s_t)$ \& most likely path $\vec{x} = \{x_1,x_2,\ldots x_n\}$
+%
+%\textbf{E-step I:} $f_k(s_t), b_k(s_t)$ by forward \& backward algorithm
+%
+%\textbf{E-step II:}
+%\begin{eqnarray}
+%P(X_t = x_k, X_{t+1} = x_l | \vec{s}, \Theta) = \\
+%\frac{1}{P(\vec{s})} f_k(s_t) a_{kl} e_l(s_{t+1}) b_l(s_{t+1}) \\
+%A_{kl} = \sum\limits_{j=1}^m \sum\limits_{t=1}^n P(X_t = x_k, X_{t+1} = x_l | \vec{s}, \Theta)
+%\end{eqnarray}
+%\textbf{M-step :}
+%\begin{eqnarray}
+%a_{kl} = \frac{A_{kl}}{\sum\limits_i^n A_{ki}} \text{   and   } e_k(b) = \frac{E_k(b)}{\sum_{b'} E_k(b')}
+%\end{eqnarray}
+%Complexity: $\mathcal{O}(|S|^2)$ in storage (space)
+% -*- root: Main.tex -*-
+
+%\subsection{Norms}
+%\begin{inparadesc}
+%	\item[\color{red}$l_0$:] $\|\mathbf{x}\|_0 := |\{i | x_i \neq 0\}|$
+%	\item[\color{red}Nuclear:] $\|\mathbf{X}\|_\star = \sum_{i=1}^{\min(m, n)} \sigma_i$
+	%			\item[\color{red}Euclidean:] $\|\mathbf{x}\|_2 := \sqrt{\sum_{i=1}^{N} \mathbf{x}_i^2} = \sqrt{\mathbf{x}^T \mathbf{x}} = \sqrt{\langle \mathbf{x}, \mathbf{x} \rangle}$
+	%			\item[\color{red}$p$-norm:] $\|\mathbf{x}\|_p := \left( \sum_{i=1}^{N} |x_i|^p \right)^{\frac{1}{p}}$
+	%\item[\color{red}Frobenius:] $\|\mathbf{A}\|_F :=\allowbreak %\sqrt{\sum_{i=1}^{M} \sum_{j=1}^{N} |\mathbf{A}_{i, j}|^2} =\allowbreak \sqrt{\operatorname{trace}(\mathbf{A}^T \mathbf{A})} =\allowbreak \sqrt{\sum_{i=1}^{\min\{m, n\}} \sigma_i^2}$ ($\sigma_i$ is the $i$-th singularvalue), $\mathbf{A} \in \mathbb{R}^{M \times N}$
+%\end{inparadesc}
+	
+	\subsubsection*{Reformulating the perceptron}
+	Ansatz: $w=\sum_{j=1}^n \alpha_j y_j x_j$\\
+	$\min \limits_{w\in\mathbb{R}^d} \sum_{i=1}^n \max [0, -y_i w^T x_i]$\\
+	$= \min \limits_{\alpha_{1:n}} \sum_{i=1}^n \max [0,-y_i  ( \sum_{j=1}^n \alpha_j y_j x_j  )^T x_i ]$\\
+	$= \min \limits_{\alpha_{1:n}} \sum_{i=1}^n \max  [0,- \sum_{j=1}^n \alpha_j y_i y_j x_i^T x_j ]$
+			
+	\subsubsection*{Kernelized Perceptron}
+	1. Initialize $\alpha_1 = ... = \alpha_n = 0$\\
+	2. For t do \\
+	Pick data $(x_i,y_i) \in_{u.a.r} D$\\
+	Predict $\hat{y} = sign(\sum_{j=1}^n \alpha_j y_j k(x_j,x_i))$\\
+	If $\hat{y} \not = y_i$ set $\alpha_i = \alpha_i + \eta_t$
+	
+%		\subsection*{Regularization}
+%	The error term $L$ and the regularization $C$ with regularization parameter $\lambda$: $\min \limits_w L(w) + \lambda C(w)$\\
+%	L1-regularization for number of features \\
+%	L2-regularization for the length of $w$
+	
+%	\subsection*{Convex}
+%	$\text{g(x) is convex}$\\
+%	$\Leftrightarrow x_1,x_2 \in \mathbb{R}, \lambda \in [0,1]:$\\
+%	$g(\lambda x_1) + (1-\lambda x_2) \leq \lambda g(x_1) + (1-\lambda) g(x_2)$
+%	$ \Leftrightarrow g''(x) > 0$
+
+%	\subsection*{Parametric to nonparametric linear regression}
+%	Ansatz: $w=\sum_i \alpha_i x$\\
+%	Parametric: $w^* = \underset{w}{\operatorname{argmin}} \sum_i (*Tx_i-y_i)^2 + \lambda ||w||_2^2$\\
+%	$= \underset{\alpha_{1:n}}{\operatorname{argmin}} \sum \limits_{i=1}^n (\sum \limits_{j=1}^n \alpha_j x_j^T x_i - y_i)^2 + \lambda \sum \limits_i \sum \limits_j \alpha_i \alpha_j (x_i^T x_j)$\\
+%	$= \underset{\alpha_{1:n}}{\operatorname{argmin}} \sum \limits_{i=1}^n (\alpha^T K_i - y_i)^2 + \lambda \alpha^T K \alpha$\\
+%	$= \underset{\alpha}{\operatorname{argmin}} ||\alpha^T K -y||_2^2 + \lambda \alpha^T K \alpha$\\
+%	Closed form: $\alpha^* = (K+\lambda I)^{-1} y$\\
+%	Prediction: $y^*= w^{*^T} x = \sum \limits_{i=1}^n \alpha_i ^* k(x_i,x)$
+
+\end{multicols*}
+\end{document}

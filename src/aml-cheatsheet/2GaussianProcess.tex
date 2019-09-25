@@ -1,0 +1,102 @@
+% -*- root: Main.tex -*-
+\section{Gaussian Processes}
+% A GP $\{X_t\}_t$ is a collection of random variables from which any finite sample has a joint Gaussian distribution.\\
+% For any finite set of points $T=\{t_1, \dots, t_n\}$ from a GP, it hold that $(X_{t_1}, \dots,X_{t_n})\sim \mathcal{N}(\pmb{\mu_T},\pmb{\Sigma_T})$ with $\pmb{\mu_T} = (\mu(t_1),\dots,\mu(t_n))$, $\pmb{\Sigma_T}(i,j)=k(X_{t_i},X_{t_j})$
+\subsection*{Gaussian Process}
+%$p\big(\begin{bmatrix}
+%\mathbf{y} \\
+%y^*\\
+%\end{bmatrix}|x^*,\mathbf{X}, \sigma \big) = \mathcal{N}\big(\begin{bmatrix}
+%\mathbf{y} \\
+%y^*\\
+%\end{bmatrix} | \mathbf{0},\begin{bmatrix}
+%\mathbf{C_n} & \mathbf{k} \\
+%\mathbf{k}^T & c 
+%\end{bmatrix}  \big)$\\
+%with $\mathbf{C_n} = \mathbf{K} + \sigma^2 \mathbf{I}, c = k(x_{n+1},x_{n+1}) + \sigma^2,\\
+%\mathbf{k}=k(x_{n+1}, \mathbf{X}), \mathbf{K}=k(\mathbf{X}, \mathbf{X})$\\
+%$p(y^*|x^*, X, y) = \mathcal{N}(y^*|\mu, \sigma^2)$\\
+%with $\mu = k^T C_n^{-1}y, \sigma^2 = c-k^TC_n^{-1}k$\\
+
+$[y_1, y_2, ...]^T\!=\!X\beta\!+\!\epsilon \sim \mathcal{N}(y|0,X \Lambda^{-1} X^T+ \sigma^2 I) $
+$y \sim \mathcal{N}(y | m(X), K(X,X) + \sigma^2 I) = P(y|X,\Theta)$ 
+
+%Joint dist.: {\footnotesize $p([y, y_{n+1}] | x_{n+1}, X, \sigma) 
+%\sim \mathcal{N}([y, y_{n+1}]|, K_{n+1} + \sigma^2I)$}
+                    
+$\left[\begin{smallmatrix} y \\y_{n+1}\end{smallmatrix}\right] \sim \mathcal{N}\left(\left[\begin{smallmatrix} y \\y_{n+1}\end{smallmatrix}\right]|[\begin{smallmatrix} m(X) \\m(x_{n+1})\end{smallmatrix}], [\begin{smallmatrix} C_n & k \\ k^T & c\end{smallmatrix}]\right)$
+	
+$p(y_{n+1}|x_{n+1}, X, y)) = \mathcal{N}(y_{n+1} | \mu_{n+1}, \sigma^2_{n+1})$	\\
+$\mu_{n+1} = m(x_{n+1})+k^T C^{-1}_n (y\!-\!m(X))$ \\
+$\sigma^2_{n+1} = c - k^T C^{-1}_n k$,$k = k(x_{n+1}, X)$ \\
+$c = k(x_{n+1},x_{n+1})\!+\!\sigma^2$,$C_n = K_n + \sigma^2 I$
+
+\subsection*{GP Hyperparameter Optimization}
+Log-likelihood:\\
+$l(Y|\theta) = -\frac{n}{2} \log(2\pi) - \frac{1}{2} \log |C_n| - \frac{1}{2} Y^T C_n^{-1}Y$\\
+Set of hyperparameters $\theta$ determine parameters $C_n$. Gradient descent: $\nabla_{\theta_i}l(Y|\theta) = -\frac{1}{2}tr(C_n^{-1} \frac{\partial C_n}{\partial \theta_i}) + \frac{1}{2} Y^T C_n^{-1} \frac{\partial C_n}{\partial \theta_i} C_n^{-1} Y$
+
+\subsection*{Kernels}
+	$K(x, y) = <\phi(x), \phi(y)>$ for some feature mapping $\phi(x)$\\
+    Psd Gram Matrix: $c^TKc \geq 0, \sum_i\sum_jc_ic_jk(x_i,x_j)\geq 0$\\
+    All principal minors of K need $det \geq 0$;\newline
+	$k(x, y) = k(y, x) ;\hspace{2mm} k(x,x) \geq 0;\hspace{2mm} k(x,x)k(v,v) \geq k(x,y)^2$ 
+	Closure Properties: {\tiny psd prop. closed under pointwise limits (since each $K_n$ is a kernel)} \\
+    $k(x,y) = k_1(x,y) + k_2(x,y)$, $k(x,y) = k_1(x,y)k_2(x,y)$\\
+	$k(x,y) = f(x)f(y)$, $k(x,y) = k_3(\phi(x),\phi(y))$\\
+    $k(x,y) = \exp(\alpha k_1(x,y)), \alpha > 0$, $|X \cap Y| = kernel$\\
+	$k(x,y) = p(k_1(x,y)), \, p(\cdot)$ {\tiny\text{polynomial with pos. coeff.}}\\   
+	$k(x,y)=k_1(x,y)/ \sqrt{(k_1(x,x) k_1(y,y)}$\\
+	Gaussian (rbf): $k(x,y) = \exp( -\tfrac{||x-y||^2}{2\sigma^2})$ {\tiny inf.dim.}\\
+	Sigmoid: $k(x,y) = \tanh(k\cdot x^Ty - b)$ {\tiny\text{not valid for $\forall k,b$}} \\
+	Polynomial: $k(x,y) {=} (x^Ty {+} c)^d$,$d\in N$,$c\geq0$ \\
+	Periodic: $k(x,y) = \sigma ^2 exp(\frac{2\sin ^2 (\pi |x-y|/p)}{\ell ^2})$
+
+% \subsubsection*{Polynomial kernel}
+% $k_1 = (x^Ty)^m$ represents monomial of deg m \\
+% $k_2 = (1+x^Ty)^m$ represents monomials up to deg m
+
+%\subsubsection*{Properties of kernel}
+%\begin{inparaitem}
+%	\item k must be symmetric\\
+%	\item the kernel matrix must be SPD
+%\end{inparaitem}
+
+%\subsubsection*{Kernel matrix}
+%The kernel matrix $K$ is SPD \\
+%$K = 
+%\begin{bmatrix}
+%k(x_1,x_1) & \dots & k(x_1,x_n) \\
+%\vdots & \ddots & \vdots \\
+%k(x_n, x_1) & \dots & k(x_n,x_n)
+%\end{bmatrix}$\\
+%$\left ( XX^T \right )$ for inner product as kernel.
+
+% \subsubsection*{semi-positive-definite matrices}
+% $M \in \mathbb{R}^{n\times n}$ is SPD $\Leftrightarrow$\\
+% $\forall x \in \mathbb{R}^n: x^TMx \geq 0 \Leftrightarrow$\\
+% all eigenvalues of $M$ are positive $\geq 0$
+
+%\subsection*{Nearest Neighbor k-NN}
+%$y=sign(\sum \limits_{i=1}^n y_i [x_i \text{ among k nearest neighbors of } x])$
+
+%$k_1(x,y) + k_2(x,y)$ , 
+%$k_1(x,y) \cdot k_2(x,y)$, 
+%$c \cdot k_1(x,y)$ for $c>0$ , 
+%$f(k_1(x,y))$, where $f$ is exponential/polynomial with positive coefficents\\
+%$k(x,y) = \phi(x)^T \phi(y)$, for some $\phi$ ass. with k
+
+%\subsubsection*{Parametric vs. Nonparametric}
+%\emph{Parametric}: have finite set of parameters\\
+%E.g. linear regression, perceptron,...\\
+%$f(x) = w^Tx, w\in \mathbb{R}^d$ (d is independent of #data)
+% \begin{itemize}
+% 	\item[+] computationally not complex
+% \end{itemize}
+
+%\emph{Nonparametric}: grows in complexity with the size of the data\\
+%E.g. kernelized Perceptron, k-NN,...\\
+%$f(x) = \sum_{i=1}^n \alpha_i y_i k(x_i,x_n)$ (depends on #data)\\
+% \begin{itemize}
+% 	\item[+] potentially much more expressive.
+% \end{itemize}

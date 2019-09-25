@@ -1,0 +1,19 @@
+\section{Unsupervised Learning}
+\subsection*{Histogram}
+$H = (H_{1},..,H_{k})$ with $H_{i} = \#\{x \in S|x \in I_{j}\}$ with $I_{j}$ = k pairwise distinct subintervals.
+Histogram as density estimation: $\widetilde{H} = \frac{1}{n}( H_{1},..H_{k})$
+\subsection*{Parzen}
+$
+\hat{p}_n = \frac{1}{n} \sum\limits_{i=1}^n \frac{1}{V_n} \phi(\frac{x-x_i}{h_n})
+$
+where $\int \phi(x)dx = 1$
+Problems: 1) $V_0$ too small - noisy, $V_0$ too big: oversmoothed 2) Different behavior of the data distribution may
+require different strategies in different parts of
+the feature space.\\
+$\int \frac{1}{N} \sum_{i=1}^N\phi(\frac{|x-x_i|}{h}) dx_i = \frac{1}{N}\frac{1}{V} \sum_{i=1}^N \int \phi(\frac{|x-x_i|}{h}) dx_i = \frac{1}{VN} \cdot VN = 1$
+
+\subsection*{K-NN}
+$\hat{p}_n = \frac{1}{V_k} \text{ volume with } k \text{ neighbours}$\\
+error rate of 1-NN classifier is bounded by twice the Bayes error rate
+\subsection*{K-means}
+$L(\mu) = \sum_{i=1}^{n} \min_{j\in\{1...k\}} \|x_i - \mu_y \|_2^2$

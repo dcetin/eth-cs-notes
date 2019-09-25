@@ -1,0 +1,43 @@
+\section{Sparse Coding}
+
+\subsection*{Orthogonal Basis}
+Pros: fast inverse; preserves energy. 
+For $\mathbf{x}$ and orthog. mat. $\mathbf{U}$ compute $\mathbf{z} = \mathbf{U}^\top \mathbf{x} $. Approx $ \mathbf{\hat{x}} = \mathbf{U\hat{z}}$, $\hat{z}_i = z_i$ if $ \lvert z_i \rvert > \epsilon$ else 0.
+Reconstruction Error $\|\mathbf{x}-\mathbf{\hat{x}}\|^2 = \sum_{d\notin\sigma}\langle\mathbf{x},\mathbf{u}_d\rangle ^2$.
+Choice of base depends on signal. Fourier: global support, good for sine like waves; wavelet: local support, poor for non-vanishing signal; PCA basis optimal for given $\Sigma$. Stripes \& check patterns: hi-freq in Fourier. Fourier: $O(D\cdot logD)$, Wavelet: $O(D)$ or $O(D\cdot logD)$
+
+\subsection*{Haar Wavelets (form orthogonal basis)}
+scaling fnc. $\phi(x)=[1,1,1,1]$, mother $W(x)=[1,1,-1,-1]$, dilated $W(2x)=[1,-1,0,0]$, translated $W(2x-1)=[0,0,1,-1]$
+Must be normalized
+\subsection*{Overcomplete Basis}
+$\mathbf{U} \in \mathbb{R}^{D \times  L}$ for \# atoms $ = L > D = \mathsf{dim}\text{(data)}$. Decoding involved $\rightarrow$ add constraint $\mathbf{z}^\star \in \argmin_\mathbf{z} \lVert \mathbf{z} \rVert_0$ s.t. $\mathbf{x} = \mathbf{Uz}$. NP-hard $\rightarrow$ approximate with 1-norm (convex) or with MP.
+
+\textbf{Coherence}
+\begin{inparaitem}[\color{red}\textbullet]
+	\item $m(\mathbf{U}) = \max_{i,j:\, i \neq j} | \mathbf{u}_i^\top \mathbf{u}_j |$
+	\item $m(\mathbf{B}) = 0$ if $\mathbf{B}$ orthog. matrix
+	\item $m([\mathbf{B}, \mathbf{u}]) \geq \frac{1}{\sqrt{D}}$ if atom $\mathbf{u}$ is added to orthog. basis $\mathbf{B}$ (o.n.b. = orthonormal base)
+\end{inparaitem}
+
+\textbf{Matching Pursuit (MP)}
+approximation of $\mathbf{x}$ onto $\mathbf{U}$, using $K$ entries.
+Objective: $\mathbf{z}^\star \in \argmin_{\mathbf{z}} \|\mathbf{x} - \mathbf{Uz} \|_2$, s.t. $\|\mathbf{z}\|_0 \leq K$
+\begin{inparaenum}[\color{red}1.]
+	\item init: $z \leftarrow 0, r \leftarrow x$
+	\item while $\|\mathbf{z}\|_0 < K$ do
+	\item select atom \textit{index} with smallest angle $i^\star = \argmax_i |\langle \mathbf{u}_i, \mathbf{r} \rangle|$
+	\item update coefficients: $z_{i^\star} \leftarrow z_{i^\star} + \langle \mathbf{u}_{i^\star}, \mathbf{r} \rangle$
+	\item update residual: $\mathbf{r} \leftarrow \mathbf{r} - \langle \mathbf{u}_{i^\star}, \mathbf{r} \rangle \mathbf{u}_{i^\star}$.
+\end{inparaenum}
+\\\textbf{Exact recovery} when: $K<1/2( 1+1/m(\mathbf{U}))$
+
+\textbf{Compressive Sensing}: Compress data while gathering:
+\begin{inparaitem}[\color{red}\textbullet]
+  \item $\mathbf{x} \in \mathbb{R}^D$, $K$-sparse in o.n.b. $\mathbf{U}$. $\mathbf{y} \in \mathbb{R}^M$ with $y_i = \langle \mathbf{w}_i, \mathbf{x}\rangle $: $M$ lin. combinations of signal; $\mathbf{y} = \mathbf{Wx} = \mathbf{WUz} = \Theta\textbf{z}$, $\Theta \in \mathbb{R}^{M \times D}$
+  \item Reconstruct $\mathbf{x} \in \mathbb{R}^D$ from $\mathbf{y}$; find $\mathbf{z}^\star \in \argmin_{\mathbf{z}}\|\mathbf{z}\|_0$, s.t. $\mathbf{y} = \Theta\mathbf{z}$ (e.g. with MP, or convex it with 1-norm: can be eq.!). Given $\mathbf{z}$, reconstruct $\mathbf{x} = \mathbf{Uz}$
+\end{inparaitem}
+\\Any orthogonal $\mathbf{U}$ sufficient if:
+\begin{inparaitem}[\color{red}\textbullet]
+  \item $\mathbf{W} = $ Gaussian random projection, i.e. $w_{ij}\sim\mathcal{N}(0, \frac{1}{D})$
+  \item M $\geq cK log(\frac{D}{K})$, where $c$ is some constant
+\end{inparaitem}

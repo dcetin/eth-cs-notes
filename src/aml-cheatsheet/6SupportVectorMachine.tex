@@ -1,0 +1,61 @@
+% -*- root: Main.tex -*-
+
+\section{SVM}
+Primal Problem: {\scriptsize ($C \rightarrow \infty$: Hard Margin)}\\
+		{\footnotesize $\min_w \frac{1}{2} w^Tw + C \sum_{i=1}^n \xi_i \hspace{3mm}
+		s.t. \hspace{2mm} z_i(w^T \phi(y_i) +w_0) \geq 1-\xi_i, \, \xi_i \geq 0$ }\\
+Dual Problem:\hspace{1mm}:
+    	$L(w,w_0,\xi,\alpha,\beta)=\frac{1}{2}w^Tw + C\sum_{i=1}^n\xi_i - \sum_{i=1}^{n}\beta_i\xi_i \\
+        \tab\tab\tab-\sum_{i=1}^{n} \alpha_i(z_i(w^T\phi(y_i) + w_0) -1+\xi_i)\\
+		\max_\alpha L(a) = \sum_{i=1}^n\alpha_i - \frac{1}{2} \sum_{i,j=1}^n z_i z_j 
+		\alpha_i \alpha_j \phi(y_i, y_j)\\
+		s.t. \, \sum_{j=1}^n z_j \alpha_j = 0 \, \wedge C \geq \alpha_i \geq 0 $\\
+optimal hyperplane:\mbox{}  $w^* = \sum_{i=1}^n \alpha_i^* z_i \phi(y_i)$ \\
+    $w_0^* = \frac{1}{n_s} \sum_{i \in S}(z_n - \sum_{j \in S} \alpha_j z_j \phi(y_i,y_j))\\
+    		\stackrel{\text{\tiny linear}}{=} -\frac{1}{2}(min_{i:z_i=1} w^{*T}y_i 
+            									+ max_{i:z_i=-1} w^{*T}y_i)$\\
+Only for support vectors:\mbox{} $\alpha_i^* > 0$\\
+Prediction:\mbox{} 
+		$z(y)=sign(\sum_{i=1}^n \alpha_i z_i \phi(y,y_i) + w_0) \\
+        \stackrel{\text{\tiny linear}}{=} sign(w^{*T}x+w_0)$\\
+Homog. Coordinates:\mbox{}  condition $\sum_{j=1}^n z_j \alpha_j = 0$ falls away.
+% \subsection*{Kernelized SVM}
+% $
+% \max_{\alpha} \sum_{i=1}^{n} \alpha_i - \frac{1}{2} \sum_{i,j} \alpha_i \alpha_j y_i y_j k(x_i, x_j), \text{ s.t. } 0 \geq \alpha_i \geq C
+% $\\
+% Classify: $y = sign(\sum_{i=1}^{n} \alpha_i y_i k(x_i, x))$
+
+% \subsection*{How to find $a^T$?}
+% $a = \{w_0,w\}$ used along $\widetilde{x} = \{1,x\}$
+
+% Gradient Descent: $a(k+1) = a(k) - \eta(k) \nabla J(a(k))$
+
+% Newton method: 2nd order Taylor to get $\eta_{opt} = H^{-1}$ with $H=\frac{\partial^2 J}{\partial a_i \partial a_j}$
+
+% $J$ is the cost matrix, popular choice is
+
+
+% \subsection*{Perceptron Algorithm}
+% Stochastic Gradient + Perceptron loss\\
+
+% \emph{Theorem:} If $D$ is linearly seperable $\Rightarrow$ Perceptron will obtain a linear seperator.
+
+% \subsection*{Support Vector Machine}
+% Try to maximize a 'band' around the seperator.\\
+
+% \subsection*{Matrix-Vector Gradient}
+% %multiply transposed matrix to the same side as its occurance w.r.t. derivate variable: $\beta \in \mathbb{R}^d$
+% $\nabla_\beta ( ||y-X\beta||_2^2 + \lambda ||\beta||_2^2 ) = 2X^T (y-X\beta) + 2\lambda \beta$\\
+
+% \subsection*{Hinge loss}
+% loss for support vector machine.\\
+% $l_{SVM}(w,x_i,y_i) = \max \{0,1-y_iw^Tx_i\} + \lambda ||w||_2^2$\\
+% derivation:\\
+% $\frac{\partial}{\partial w_k} l_{SVM}(w,y_i,x_i) = \left \{
+% \begin{array}{lr}
+% 0 \text{ , if } 1-y_iw^Tx_i < 0 \\
+% -y_ix_{i,k} + 2\lambda w_k \text{ , otherwise}
+% \end{array} \right.	$
+
+% \subsection*{Sparse L1-SVM}
+% $\underset{w}{\operatorname{argmin}} \sum \limits_{i=1}^n \max (0, 1-y_i w^T x_i) + \lambda ||w||_1$

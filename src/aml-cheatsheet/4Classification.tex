@@ -1,0 +1,36 @@
+% -*- root: Main.tex -*-
+\section{Classification}
+\subsection*{Loss-Functions}
+True class: $y \in \{-1,1\}$, pred. $z \in [-1,1]$\\
+Cross-entropy (log loss): ($y'=\tfrac{(1+y)}{2}$ and $z'=\tfrac{(1+z)}{2}$) $L(y',z') {=} -[y'log(z') {+} (1-y')log(1-z')]$ \\
+Hinge Loss: $L(y,z) = max(0, 1-yz)$ \\
+Perceptron Loss: $L(y,z) = max(0, -yz)$ \\
+Logistic loss: $L(y,z) = log(1 + exp(-yz))$ \\
+Square loss: $L(y,z) = \tfrac{1}{2}(1-yz)^2$ \\
+Exponential loss: $L(y,z) = exp(-yz)$ \\
+Binomial deviance: $L(y,z) = 1 + exp(-2yz)$ \\
+0/1 Loss: $L(y,z) = \mathbb{I}\{sign(z)\neq y\}$ \\
+
+\subsection*{Perceptron} 
+Gradient descent: $a(k+1) = a(k) - \eta(k)\nabla J(a(k))$ \\
+$J(a)\approx J(a(k))+\nabla J^T(a-a(k)) + \tfrac{1}{2}(a-a(k))^T H (a-a(k))$, $H{=}\frac{\partial^2 J}{\partial a_i \partial a_j}$ \\
+$2^{nd}$ order algorithm: $\eta_{opt} = \frac{\norm{\nabla J}^2}{\nabla J^T H \nabla J}$ \\
+Newton's rule: $a(k+1){=}a(k){-}H^{{-}1}\nabla J$\\
+Perceptron criteria: $J_p(a)=\sum_{\widetilde{x}\in\widetilde{\mathcal{X}}^{mc}} (-a^T \widetilde{x})$ \\
+Perceptron rule: $a(k+1)=a(k)+\eta(k)\sum_{\widetilde{x}\in\widetilde{\mathcal{X}}^{mc}} \widetilde{x}$ \\
+Perceptron convergence:$\left \| a(k+1)- \alpha \hat a \right \|^{2} = \left \| a(k)- \alpha \hat a \right \|^{2}  + 2(a(k)- \alpha \hat a)^{T} \tilde x^{k} + \left \| \tilde x^{k} \right \|^{2} \leq \left \| a(k)- \alpha \hat a \right \|^{2} -2\alpha \gamma + \beta ^{2}$
+where $\beta^{2} = max_{i}  \left \| \tilde x_{i \in \tilde X^{mc} } \right \| ^{2}$ and $\gamma = min_{i \in \tilde X^{mc} } (\hat a^{T} \tilde x_{i}) > 0 $ for $\alpha= \beta^{2} / \gamma$  then $k_{0}= \alpha^{2}\left \|\hat a \right \|^{2} / \beta^{2}=  \beta^{2}\left \|\hat a \right \|^{2} / \gamma^{2}$
+%\subsection*{Bayesian Decision Theory}
+%Est. cond. dist: $P(y|x,w) = Ber(\sigma(w^Tx))$\\
+%Action set: $\mathcal{A} = \{ +1, -1\}$\\
+%Cost fn: $C(y,a) = \{ 
+%\begin{array}{lr}
+%	c_{FP} \text{ , if $y=-1$ and $a=+1$}\\
+%	c_{FN} \text{ , if $y=+1$ and $a=-1$}\\
+%	0 \text{ , otherwise}
+%\end{array}
+%$
+%The action that minimizes the expected cost is:\\
+%$C_+ = \mathbb{E}_y[C(y,+1)|x] = P(y=+1|x) \cdot 0 + (P(y=-1)|x) \cdot %c_{FP}$\\
+%$C_- = \mathbb{E}_y[C(y,-1)|x] = P(y=+1|x) \cdot c_{FN} + P(y=-1|x) \cdot %0$\\
+%Predict +1 if $C_+ \leq C_-$

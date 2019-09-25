@@ -1,0 +1,8 @@
+\section{Deep Unsupervised Learning}
+\textbf{AR:} Image $p(\mathbf{x})=\Pi_i^{n^2}p(x_i|x_1,\cdots,x_{i-1})$ \textbf{ELBO:} \\
+$\mathbb{E}_{x\sim P_{\mathbb{X}}}[\mathbb{E}_{z\sim Q}{\log P_g(x|z)}-D_{KL}(Q(z|x)\|P(z))]$\\
+$Q$ enc. posterior distr., $P(z)$ prior distr. on latent var $z$, $P_g$ likelihood of dec. generated $\mathbf{x}$. 
+Jointly trained: enc. optimize regularizer term, sample $\mathbf{z}\sim Q$, feed to dec., produce $\hat{x}$ to max. reconstruction quality. Both terms diff'able, can use SGD to train end-to-end.
+\textbf{Reparam. trick:} use variational distr.s s.t. $q_\phi(\mathbf{z};\mathbf{x}) = g_\phi(\zeta;\mathbf{x})$ with eg. $\zeta \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$
+Example: 
+$\zeta \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$, $\mathbf{z} = \mu + U\zeta$ then $z \sim \mathcal{N}(\mu, \mathbf{U^{\top}U})$

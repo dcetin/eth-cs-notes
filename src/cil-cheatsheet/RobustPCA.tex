@@ -1,0 +1,22 @@
+\section{Robust PCA}
+\begin{compactitem}
+	\item Idea: Approximate $\mathbf{X}$ with $\mathbf{L} + \mathbf{S}$, $\mathbf{L}$ is low-rank, $\mathbf{S}$ is sparse.
+	\item $\min_{\mathbf{L},\mathbf{S}}\mathsf{rank}(\mathbf{L}) + \mu \lVert \mathbf{S}\rVert_0$, s. t. $\mathbf{L} + \mathbf{S} = \mathbf{X}$. As non-convex, change to $\min_{\mathbf{L},\mathbf{S}} \|\mathbf{L}\|_\star + \lambda \lVert\mathbf{S}\rVert_1$ (\emph{not} the same in general) Deal w/ missing values: subj. to $L_{ij} + S_{ij} = X_{ij}, \forall(i,j) \in \Omega_{observed}$
+	\item Perfect reconstruction is \emph{not} possible if $\mathbf{S}$ is low-rank, $\mathbf{L}$ is sparse, or $\mathbf{X}$ is low-rank \textit{and} sparse. Formally coherence: $\|\mathbf{U}^\top \mathbf{e}_i\|^2 \leq \frac{\nu r}{n}$, $\|\mathbf{V}^\top \mathbf{e}_i\|^2 \leq \frac{\nu r}{n}$, $\|\mathbf{UV}^\top\|^2_{ij} \leq \frac{\nu r}{n^2}$ : $\mathbf{L}=\mathbf{U}\mathbf{D}\mathbf{V}^\top$
+\end{compactitem}
+
+\subsection*{Dual Ascent (Gradient Method for Dual Problem)}
+$\boldsymbol{\lambda}^{t+1} = \boldsymbol{\lambda}^{t} + \eta \nabla D(\boldsymbol{\lambda}^t)$,
+$ \nabla D (\boldsymbol{\lambda}) = \mathbf{A}\mathbf{x}^*-\mathbf{b}$ for $\mathbf{x}^* \in \arg\min_\mathbf{x} \mathcal{L}(\mathbf{x},\boldsymbol{\lambda})$
+\textbf{Dual Decomposition for Dual Ascent}:
+\\$\mathbf{x}_i^{t+1} := \arg\min_{\mathbf{x}_i} \mathcal{L}_i(\mathbf{x}_i,\lambda^t)$;
+$\boldsymbol{\lambda}^{t+1} := \boldsymbol{\lambda}^t + \eta^t \left( \sum_{i=1}^{N} \mathbf{A}_i \mathbf{x}_i^{t+1} -\mathbf{b} \right) $
+
+\subsection*{Alternating Direction Method of Multipliers (ADMM)}
+$\min_{\mathbf{x}_1, \mathbf{x}_2} f_1(\mathbf{x}_1) + f_2(\mathbf{x}_2)$ s. t. $\mathbf{A}_1 \mathbf{x}_1 + \mathbf{A}_2 \mathbf{x}_2 = \mathbf{b}$, $f_1, f_2$ convex
+\begin{inparaitem}[\color{red}\textbullet]
+	\item Augmented Lagrangian: $L_p(\mathbf{x}_1, \mathbf{x}_2, \boldsymbol{\nu}) = f_1(\mathbf{x}_1) + f_2(\mathbf{x}_2) + \boldsymbol{\nu}^\top (\mathbf{A}_1 \mathbf{x}_1 + \mathbf{A}_2 \mathbf{x}_2 - \mathbf{b}) + \frac{p}{2}\| \mathbf{A}_1 \mathbf{x}_1 + \mathbf{A}_2 \mathbf{x}_2 - \mathbf{b} \|_2^2$
+	\item ADMM: $\mathbf{x}_1^{(t+1)} := \argmin_{\mathbf{x}_1} L_p(\mathbf{x}_1, \mathbf{x}_2^{(t)}, \boldsymbol{\nu}^{(t)})$, $\mathbf{x}_2^{(t+1)} := \argmin_{\mathbf{x}_2} L_p(\mathbf{x}_1^{(t+1)}, \mathbf{x}_2, \boldsymbol{\nu}^{(t)})$, $\boldsymbol{\nu}^{(t+1)} := \boldsymbol{\nu}^{(t)} + p(\mathbf{A}_1 \mathbf{x}_1^{(t+1)} + \mathbf{A}_2 \mathbf{x}_2^{(t+1)} - \mathbf{b})$
+  \item ADMM for RPCA: $f_1(\mathbf{L}) = \|\mathbf{L}\|_\star$, $f_2(\mathbf{S}) = \lambda \| \mathbf{S} \|_1$, $\mathbf{A}_1 \mathbf{x}_1 + \mathbf{A}_2 \mathbf{x}_2 = \mathbf{b} \text{ becomes } \mathbf{L} + \mathbf{S} = \mathbf{X}$, therefore $L_p(\mathbf{L}, \mathbf{S}, \boldsymbol{\nu}) = \|\mathbf{L}\|_* + \nu \|\mathbf{S}\|_1 + \left< \nu, \mathrm{vec}(\mathbf{L}+\mathbf{S}-\mathbf{X}) \right> + \frac{P}{2} \| \mathbf{L}+ \mathbf{S} - \mathbf{X} \|_F^2$
+  %updates: $\mathbf{L}^{t+1} = \mathcal{D}_{\rho^{-1}}(X-S-\rho^{-1}\text{mat}(\lambda))$
+\end{inparaitem}

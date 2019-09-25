@@ -1,0 +1,17 @@
+% !TEX root = Main.tex
+\section{Word Embeddings}
+\textbf{Distr. Model:} $p_\theta(w|w')$ = Pr[$w$ in context of $w'$]\\
+\textbf{Log-likelihood:}\\
+$L(\theta; \mathbf{w}) = \sum_{t=1}^T\sum_{\Delta \in I}{\log p_\theta(w^{(t+\Delta)}|w^{(t)})}$\\
+\textbf{Latent Vector Model:} $w \rightarrow (\mathbf{x}_w, b_w) \in \mathbb{R}^{D+1} \\p_{\theta}(w|w') = \frac{\exp[\langle \mathbf{x}_w,\mathbf{x}_{w'}\rangle + b_w]}{\sum_{v\in V}{\exp[\langle \mathbf{x}_v,\mathbf{x}_{w'}\rangle + b_v ]}}$ (soft-max).\\
+\textbf{Modifications:}\\
+$\log p_{\theta}(w|w') = \langle  y_{w} , x_{w'} \rangle + b_w$,  word $y_w$, c'txt $x_{w'}$\\
+use GloVe obj., negative sampling (logistic class.)
+
+\subsection*{GloVe (Weighted Square Loss)}
+\textbf{Co-occ.:} $\mathbf{N} = (n_{ij}) \in \mathbb{R}^{|V|\times|C|} = \# w_i$ in context $w_j$\\ \textbf{Objective:} $H(\theta;\mathbf{N})= \sum_{n_{ij} > 0} f(n_{ij})(\log n_{ij} - \log \exp[\langle \mathbf{x}_i, \mathbf{y}_j \rangle + b_i + d_j])^2$, $f(n) = \min\{1, (\frac{n}{n_{max}})^\alpha\}$, $\alpha \in (0;1]$ ($ = 3/4$) unnorm. distr. $\rightarrow$ 2-sided loss. 
+cutoff $n_{max}$: limit influence of high freq. $f(n)\stackrel{n\rightarrow0}{\rightarrow}0$: as small counts very noisy\\
+1. sample $(i,j) u.a.r, s.t. n_{ij}>0$\\
+2. $\mathbf{x}_i^{new} \leftarrow \mathbf{x}_i + 2\eta f(n_{ij})(\log n_{ij} - \langle \mathbf{x}_i, \mathbf{y}_j \rangle)\mathbf{y}_j$\\
+3. $\mathbf{y}_j^{new} \leftarrow \mathbf{y}_j + 2\eta f(n_{ij})(\log n_{ij} - \langle \mathbf{x}_i, \mathbf{y}_j \rangle)\mathbf{x}_i$
+\par embeds can model analogies and relatedness, but antonyms are usually not well captured.

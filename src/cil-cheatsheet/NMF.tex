@@ -1,0 +1,39 @@
+% !TEX root = Main.tex
+\section{Non-Negative Matrix Factorization}
+$\mathbf{X} \in \mathbb{Z}^{N \times M}_{\geq 0}$, NMF: $\mathbf{X} \approx \mathbf{U^\top V}, x_{ij}=\sum_z{u_{zi}v_{zj}}=\langle\mathbf{u}_i \mathbf{v}_j\rangle$
+Decompose object into features: topics, face parts, etc.. $\mathbf{u}$ weights on parts, $\mathbf{v}$ parts (bases). More interpretable (PCA: holistic repre.).
+
+\subsection*{EM for MLE for pLSA (No global opt. guarantee)}
+\textbf{Context Model:} $p(w | d) = \sum_{z=1}^K p(w | z) p(z | d)$\\
+\textbf{Conditional independence assumption ($*$):}\\
+$p(w|d) = \sum_z p(w,z|d) = \sum_z p(w|d,z)p(z|d) \stackrel{*}{=} \sum_z p(w|z)p(z|d)$ or $p(w|d,z) = p(w|z)$\\
+\textbf{Symmetric parameterization:}\\
+$p(w, d) = \sum_z p(z)p(w | z) p(d | z)$ \\
+Log-Likelihood: $L(\mathbf{U}, \mathbf{V}) = \sum_{i,j} x_{i,j}\log p(w_j|d_i) \\
+= \sum_{(i,j) \in X} \log \sum_{z=1}^K p(w_j|z)p(z|d_i)$ \\ 
+$ p(w_j|z) = v_{zj}$, $p(z|d_i) = u_{zi}$, $\sum_j^N v_{zj} = \sum_z^K u_{zi} = 1$\\
+E-Step (optimal q: posterior of z over $(d_i, w_j)$):\\
+$q_{zij} = \frac{p(w_j|z)p(z|d_i)}{\sum_{k=1}^K p(w_j|k)p(k|d_i)} := \frac{v_{zj}u_{zi}}{\sum_{k=1}^K v_{kj}u_{ki}}$, $\sum_z q_{zij}=1$\\
+M-Steps:\\
+$p(z|d_i) = \frac{\sum_j x_{ij}q_{zij}}{\sum_j x_{ij}}, p(w_j|z) = \frac{\sum_i x_{ij}q_{zij}}{\sum_{i,l}x_{il}q_{zil}}$\\
+Lower Bound of $L(\mathbf{U}, \mathbf{V})$ Jensen ineq. :  $\sum_{i,j \in X}  \sum_{z=1}^K q_{zij}( log(v_{zj})+ log(u_{zi}) - log(q_{zij}))$
+
+\subsection*{Latent Dirichlet Allocation}
+To sample a new document, we need to extend $X$ and $U^T$ with a new row, s.t. $X=U^T V$. (While pLSA fixes both dimensions)\\
+For each $d_i$ sample topic weights $\mathbf{u}_i$\textasciitilde Dirichlet($\alpha$): $p(u_i|\alpha) = \prod_{z=1}^K u_{zi}^{\alpha_k-1}$, then topic $z^t$\textasciitilde Multi($u_i$), word $w^t$\textasciitilde Multi($v_{z^t}$)\\
+Multinom. obsv. model on wc vec: $p(\mathbf{x}|V,u) = \frac{l!}{\prod_j \mathbf{x}_j!}\prod_j \pi_j^{\mathbf{x}_j}$ 
+where $\pi_j=\sum_z v_{zj} u_z$, $l=\sum_j x_j$ \\
+Bayesian averaging over $\mathbf{u}$: $p(\mathbf{x}|\mathbf{V},\alpha)=\int p(\mathbf{x}|\mathbf{V},\mathbf{u})p(\mathbf{u}|\alpha)d\mathbf{u}$
+
+\subsection*{NMF Algorithm for quadratic cost function}
+
+$\min_{\mathbf{U}, \mathbf{V}} J(\mathbf{U}, \mathbf{V}) = \frac{1}{2} \|\mathbf{X} - \mathbf{U}^\top\mathbf{V}\|_F^2$ (non-negativity)
+s.t. $\forall i,j,z:u_{zi},v_{zj} \geq 0 $ \\
+Comparison with pLSA:\\
+1. sampling model: Gaussian vs multinomial
+2. objective: quadratic vs KL divergence
+3. constraints: not normalized \\
+Alternating least squares:\\
+1. init: $\mathbf{U}, \mathbf{V} = rand()$\\ 2. repeat 3\textasciitilde4 for $\mathit{maxIters}$:\\
+3. upd. $(\mathbf{VV}^\top)\mathbf{U} = \mathbf{VX}^\top$, proj. $u_{zi} = \max \{ 0, u_{zi} \}$\\
+4. update $(\mathbf{UU}^\top)\mathbf{V} = \mathbf{UX}$, proj. $v_{zj} = \max \{ 0, v_{zj} \}$

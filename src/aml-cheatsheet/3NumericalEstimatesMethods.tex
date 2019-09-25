@@ -1,0 +1,23 @@
+% -*- root: Main.tex -*-
+\section{Numerical Estimating Methods}
+Actual Risk: $\mathcal{R}(f) := \E_{x,y}[(y-f(x))^2]$ \\
+Empiricial Risk: $\hat{\mathcal{R}}(f) = \frac{1}{n}\sum_i (y_i - f(x_i))^2$\\
+Generalization Error: $G(f) = |\hat{\mathcal{R}}(f) - \mathcal{R}(f)|$
+\subsection*{$K$-fold cross validation}
+$\hat{f}^{-\nu} \in \argmin_f \frac{1}{|Z^{-\nu}|} \sum_{i \in Z^{-\nu}} (y_i - f(x_i))^2$\\
+$\hat{\mathcal{R}}^{cv} = \frac{1}{n} \sum_i(y_i - \hat{f}^{-\kappa(i)}(x_i))^2$, $k(i)$ is fold $i^{th}$ fold \\
+Problem: systematic tendency to underfit.
+\subsection*{Leave-one-out}
+unbiased, high variance \\
+$\hat{f}^{-i} \in \argmin_f \frac{1}{n-1} \sum_{j:j \neq i} L(y_i,f(x_i))$ \\
+$\hat{\mathcal{R}}^{LOOCV} = \frac{1}{n} \sum_i L(y_i, \hat{f}^{-i}(x_i))$
+\subsection*{Bootstrapping}
+Resampling with replacement from data $D$ to produce $B$ boostrap datasets $D^{*b}$.  $S(D)$ is expected generalization error of prediction model trained on $D$. Var: $\sigma ^2(S) = \frac{1}{B-1}\sum_{b=1}^B(S(D^{*b})-\bar{S})^2$ with mean: $\hat{R}_{boot}(f)=\bar{S}=\frac{1}{B}\sum_{b=1}^B(\frac{1}{N}\sum_{i=1}^NL(y_i,\hat{f}_{D^{*b}}(x_i)))$ with $\hat{f}_{D^{*b}}(x_i)$ being the prediction model. $\hat{R}_{boot}^{LOO}(f) = \frac{1}{N}\sum_{i=1}^N\frac{1}{|C^{-i}|}\sum_{b\in C^{-i}}L(y_i,\hat{f}_{D^{*b}}(x_i))$ where $C^{-i}$ denotes the set of bootstrap sets not containing data point $i$. Note: $L$ can be $I_{\{c(x_i)\not =y_i\}}$.
+$\hat{R}_{boot}$ is optimistic. Hence use: $\hat{R}^{.0632}=0.368\hat{R}_{boot}+0.632\hat{R}_{boot}^{(LOO)}$. \\
+Prob. not to appear in set: $(1-\frac{1}{n})^n = \frac{1}{e}$ for $n \rightarrow \infty$
+\subsection*{Jackknife}
+Goal: Numerical estimate of bias of an estimator $\hat{S}_n$. Jackknife estimator: $\hat{S}^{JK}=\hat{S}_n-bias^{JK}$ with $bias^{JK}=(n-1)(\tilde{S}_n-\hat{S}_n)$ with $\tilde{S}_n=\frac{1}{n}\sum_{i=1}^n\hat{S}^{(-i)}_{n-1}$ with $\hat{S}^{(-i)}_{n-1}$ being the leave-1-out estimator.
+\subsection*{Information Criteria}
+$BIC = ln(n)k - 2ln(\hat{L})$, $AIC = 2k - 2ln(\hat{L})$\\
+$TIC = 2trace[I_1(\theta_k)J_1^{-1}(\theta_k)] - 2ln(\hat{L})$, 
+where k: num. params, n: num. data points, likelihood: $\hat{L}=p(X|\theta_k,M)$  

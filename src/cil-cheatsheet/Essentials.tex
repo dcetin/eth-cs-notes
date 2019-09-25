@@ -1,0 +1,88 @@
+% -*- root: Main.tex -*-¨
+\renewcommand{\baselinestretch}{0.1} 
+\section{Essentials}
+\subsection*{Matrix/Vector}
+    \textbf{Vectors:}
+    Unit vector: $u^{\top}u=1$
+    Orthogonal vectors: $u^{\top}v=0$
+    \textbf{Range, Kernel, Nullity:}
+    % range
+    $\mathit{range}(\mathbf{A}) = \{\textbf{z} | \exists \textbf{x}: \textbf{z}=\textbf{Ax}\} = \mathit{span}(\text{columns of A})$ \\
+    % rank
+    $\mathit{rank}(\mathbf{A}) = \mathit{dim}(\mathit{range}(\mathbf{A}))$ 
+    % kernel
+    $\mathit{kernel}(A) = \{\mathbf{x}: \mathbf{Ax}=\mathbf{0}\}$ (spans nullspace)
+    % nullity
+    $\mathit{nullity}(\mathbf{A}) = \mathit{dim}(\mathit{kernel}(\mathbf{A}))$
+    \textbf{Ranks:} $rank(XY) \leq rank(X) \forall X \in R^{mxn}, Y \in R^{nxk}$ eq. if  $Y \in R^{nxn}, rank(Y) = n$
+    \textbf{Rank-nullity Theorem:}
+    $\textit{dim}(\textit{kernel}(\textbf{A}))+\textit{dim}(\textit{range}(\textbf{A})) = n$\\
+	\textbf{Orthogonal mat.} $\mathbf{A}^{-1} = \mathbf{A}^\top$, $\mathbf{A} \mathbf{A}^\top = \mathbf{A}^\top \mathbf{A} = \mathbf{I}$, $\operatorname{det}(\mathbf{A}) \in \{+1, -1\}$, $\operatorname{det}(\mathbf{A}^\top \mathbf{A}) = 1$,
+	preserves inner product, norm, distance, angle, rank, matrix orthogonality \textbf{Outer Product:} $\mathbf{u} \mathbf{v}^\top$, $(\mathbf{u} \mathbf{v}^\top)_{i, j} = \mathbf{u}_i \mathbf{v}_j$\\
+	\textbf{Inner Product:} $\langle \mathbf{x}, \mathbf{y} \rangle = \mathbf{x}^\top \mathbf{y} = \sum_{i=1}^{N} \mathbf{x}_i \mathbf{y}_i$.
+	$\langle \mathbf{x} \pm \mathbf{y}, \mathbf{x} \pm \mathbf{y} \rangle = \langle \mathbf{x}, \mathbf{x} \rangle \pm 2 \langle \mathbf{x}, \mathbf{y} \rangle + \langle \mathbf{y}, \mathbf{y} \rangle$\\
+	$(\mathbf{u}_i^T\mathbf{v}_j)\mathbf{v}_j = (\mathbf{v}_j\mathbf{v}_j^T)\mathbf{u}_i$ 
+	\textbf{Cross product:} $\vec{a}\times\vec{b}=(a_2b_3-a_3b_2, a_3b_1-a_1b_3, a_1b_2-a_2b_1)^\top$\\
+    \textbf{Trace:} $\mathit{trace}(\mathbf{XYZ})=\mathit{trace}(\mathbf{ZXY})$\\
+	\textbf{Transpose:} $(\mathbf{A}^\top)^{-1} = (\mathbf{A}^{-1})^\top$,  $(\mathbf{A}\mathbf{B})^\top= \mathbf{B}^\top\mathbf{A}^\top$, $(\mathbf{A}+\mathbf{B})^\top= \mathbf{A}^\top + \mathbf{B}^\top$\\
+	\textbf{Cauchy-Schwarz inequality:} $|\langle\mathbf{u}, \mathbf{v}\rangle| \leq \|\mathbf{u}\|\|\mathbf{v}\|$
+	\textbf{Jensen inequality:} for convex function $f$, non negative $\lambda_i$ st. $\sum_{i=1}^{n} \lambda_i = 1$: $f(\sum_{i=1}^{n} \lambda_ix_i) \leq \sum_{i=1}^{n}\lambda_if(x_i)$ Note: for concave, inequality sign switches
+    \textbf{Convexity:}$f(\theta x+(1-\theta)y) \le \theta f(x)+(1-\theta)f(y), \forall\theta \in [0,1]$
+    \textbf{Least Squares equations:} $\argmin_{\beta \in \mathbb{R}^{p + 1}}\|\mathbf{y-X\beta}\|^2$, $\hat{\beta}=(X^{\top}X)^{-1}X^{\top}y$\\
+    \textbf{Einstein matrix notation:}$(A \cdot B)_{ij} = \sum_{k=1}^n A_{ik} \cdot B_{kj}$
+    \textbf{Kullback-Leibler:} $KL(\boldsymbol{P}||\boldsymbol{Q}) = \sum_{x \in \boldsymbol{X}} P(x)\log{\frac{P(x)}{Q(x)}}$
+\subsection*{Norms}
+\begin{inparaitem}
+	\item $\|\mathbf{x}\|_0 = |\{i | x_i \neq 0\}|$ \\
+	\item $\|\mathbf{x}\|_2 = \sqrt{\sum_{i=1}^{N} \mathbf{x}_i^2} = \sqrt{\langle \mathbf{x}, \mathbf{x} \rangle}$ \\
+	\item $\|\mathbf{u}-\mathbf{v}\|_2 = \sqrt{(\mathbf{u}-\mathbf{v})^\top(\mathbf{u}-\mathbf{v})}$ \\
+	\item $\|\mathbf{x}\|_p = \left( \sum_{i=1}^{N} |x_i|^p \right)^{\frac{1}{p}}$ ;
+	$\|\mathbf{x}\|_\infty = \max_{i=1, \ldots , n} |x_i|$\\
+	\item
+	$\|\mathbf{M}\|_F =\allowbreak \sqrt{\sum_{i=1}^{m} \sum_{j=1}^{n}\mathbf{m}_{i,j}^2} = \sqrt{\sum_{i=1}^{\min\{m, n\}} \sigma_i^2} \allowbreak = \|\sigma(\mathbf{A})\|_2  = \sqrt{trace(\mathbf{M}^T\mathbf{M})} $\\
+	\item $\|\mathbf{M}\|_G=\sqrt{\sum_{ij}{g_{ij}x^2_{ij}}}$ (weighted Frobenius) \\
+	\item
+	$\|\mathbf{M}\|_1 = \sum_{i,j} | m_{i,j}|$ \\
+	\item $\|\mathbf{M}\|_2 = \sigma_{\text{max}}(\mathbf{M}) = \|\sigma(\mathbf(M))\|_\infty$ (spectral)\\
+	\item $\|\mathbf{M}\|_p = \max_{\mathbf{v} \neq 0} \frac{\|\mathbf{M}\mathbf{v}\|_p}{\|\mathbf{v}\|_p}$ \\
+	\item $\|\mathbf{M}\|_\star = \sum_{i=1}^{\min(m, n)} \sigma_i = \|\sigma(\mathbf{A})\|_1$ (nuclear)
+\end{inparaitem}
+
+\subsection*{Derivatives}
+$\frac{\partial}{\partial \mathbf{x}}(\mathbf{b}^\top \mathbf{x}) = \frac{\partial}{\partial \mathbf{x}}(\mathbf{x}^\top \mathbf{b}) = \mathbf{b}$ \quad
+$\frac{\partial}{\partial \mathbf{x}}(\mathbf{x}^\top \mathbf{x}) = 2\mathbf{x}$\\
+$\frac{\partial}{\partial \mathbf{x}}(\mathbf{x}^\top \mathbf{A}\mathbf{x}) = (\mathbf{A}^\top + \mathbf{A})\mathbf{x}$ \quad
+$\frac{\partial}{\partial \mathbf{x}}(\mathbf{b}^\top \mathbf{A}\mathbf{x}) = \mathbf{A}^\top \mathbf{b}$\\
+$\frac{\partial}{\partial \mathbf{X}}(\mathbf{c}^\top \mathbf{X} \mathbf{b}) = \mathbf{c}\mathbf{b}^\top$ \quad
+$\frac{\partial}{\partial \mathbf{X}}(\mathbf{c}^\top \mathbf{X}^\top \mathbf{b}) = \mathbf{b}\mathbf{c}^\top$\\
+$\frac{\partial}{\partial \mathbf{x}}(\| \mathbf{x}-\mathbf{b} \|_2) = \frac{\mathbf{x}-\mathbf{b}}{\|\mathbf{x}-\mathbf{b}\|_2}$ \quad
+$\frac{\partial}{\partial \mathbf{x}}(\|\mathbf{x}\|^2_2) = \frac{\partial}{\partial \mathbf{x}} (\mathbf{x}^\top \mathbf{x}) = 2\mathbf{x}$\\
+$\frac{\partial}{\partial \mathbf{X}}(\|\mathbf{X}\|_F^2) = 2\mathbf{X}$ \quad
+$\frac{\partial}{\partial \mathbf{x}}\log(x) = \frac{1}{x}$
+
+\subsection*{Eigendecomposition}
+$\mathbf{A} \in \mathbb{R}^{N \times N}$ then $\mathbf{A} = \mathbf{Q} \boldsymbol{\Lambda} \mathbf{Q}^{-1}$ with $\mathbf{Q} \in \mathbb{R}^{N \times N}$.\\
+if fullrank: $\mathbf{A}^{-1} = \mathbf{Q} \boldsymbol{\Lambda}^{-1} \mathbf{Q}^{-1}$ and $(\boldsymbol{\Lambda}^{-1})_{i,i} = \frac{1}{\lambda_i}$.\\
+if $\mathbf{A}$ symmetric: $A = \mathbf{Q} \boldsymbol{\Lambda} \mathbf{Q^\top}$ ($\mathbf{Q}$ orthogonal).
+Eigenvalue $\lambda$: solve $det(A - \lambda I) = 0$
+Eigenvector $v$: solve $(A - \lambda I)*v = \overrightarrow{0}$
+
+\subsection*{Probability / Statistics}
+\begin{inparaitem}
+	\item $P(x) := Pr[X = x] := \sum_{y \in Y} P(x, y)$
+	\item $P(x|y) := Pr[X = x | Y = y] := \frac{P(x,y)}{P(y)},\quad \text{if } P(y) > 0$
+	\item $\forall y \in Y: \sum_{x \in X} P(x|y) = 1$ (property for any fixed $y$)
+	\item $P(x, y) = P(x|y) P(y)$
+	\item $\text{posterior} P(A|B)=\frac{\text{prior} P(A)\times\text{likelihood} P(B|A)}{\text{evidence} P(B)}$ (Bayes' rule)
+	\item $P(x|y) = P(x) \Leftrightarrow P(y|x) = P(y)$ (iff $X$, $Y$ independent)
+	\item $P(x_1, \ldots, x_n) = \prod_{i=1}^n P(x_i)$ (iff IID)
+	\item Variance $Var[X]:= E[(X-\mu_x)^2]:=\sum_{x \in X}(x-\mu_x)^2P(x)= E(X^2) - E(X)^2$ $\operatorname{Var}(aX)=a^2\operatorname{Var}(X)$
+	\item expectation $\mu_x := E[X]:=\sum_{x \in X}xP(x)$
+	\item $E[X+Y] = E[X] + E[Y]$
+	\item standard deviation $\sigma_x := \sqrt{Var[X]}$
+\end{inparaitem}
+
+
+\subsection*{Lagrangian Multipliers}
+Minimize  $f(\mathbf{x})$ s.t. $g_i(\mathbf{x}) \leq 0,\ i = 1, .., m$ (\textbf{inequality constr.}) and $h_i(\mathbf{x}) = \mathbf{a}_i^\top \mathbf{x} - b_i = 0$ or $h_i(\mathbf{x}) = \sum_{w} x_{w,i} - b_i = 0,\ i = 1, .., p$ (\textbf{equality constraint}) \\
+$L(\mathbf{x}, \boldsymbol{\alpha}, \boldsymbol{\beta}) := f(\mathbf{x}) + \sum_{i=1}^m \alpha_i g_i(\mathbf{x}) + \sum_{i=1}^p \beta_i h_i(\mathbf{x})$

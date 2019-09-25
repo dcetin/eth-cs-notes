@@ -1,0 +1,31 @@
+% -*- root: Main.tex -*-
+\section{Principal Component Analysis}
+$\mathbf{X} \in \mathbb{R}^{D \times N}$. $N$ observations, $K$ rank.\\
+1. Empirical Mean: $\overline{\mathbf{x}} = \frac{1}{N} \sum_{n=1}^N \mathbf{x}_n$.\\
+2. Center Data: $\overline{\mathbf{X}} = \mathbf{X} - [\overline{\mathbf{x}}, \ldots, \overline{\mathbf{x}}] = \mathbf{X} - \mathbf{M}$.\\
+3. Cov.: $\boldsymbol{\Sigma} = \frac{1}{N	} \sum_{n=1}^N (\mathbf{x}_n - \overline{\mathbf{x}}) (\mathbf{x}_n - \overline{\mathbf{x}})^\top = \frac{1}{N} \overline{\mathbf{X}}\overline{\mathbf{X}}^\top$.\\
+4. Eigenvalue Decomposition: $\boldsymbol{\Sigma} = \mathbf{U} \boldsymbol{\Lambda} \mathbf{U}^\top$.\\
+5. Select $K < D$, only keep $\mathbf{U}_K, \boldsymbol{\lambda}_K$.\\
+6. Transform data onto new Basis: $\overline{\mathbf{Z}}_K = \mathbf{U}_K^\top \overline{\mathbf{X}}$.\\
+7. Reconstruct to original Basis: $\tilde{\overline{\mathbf{X}}} = \mathbf{U}_k \overline{\mathbf{Z}}_K$.\\
+8. Reverse centering: $\tilde{\mathbf{X}} = \tilde{\overline{\mathbf{X}}} + \mathbf{M}$.\\
+For compression save $\mathbf{U}_k, \overline{\mathbf{Z}}_K, \overline{\mathbf{x}}$.\\
+$\mathbf{U}_k \in \mathbb{R}^{D \times K}, \boldsymbol{\Sigma} \in \mathbb{R}^{D \times D}, \overline{\mathbf{Z}}_K \in \mathbb{R}^{K \times N}, \overline{\mathbf{X}} \in \mathbb{R}^{D \times N}$
+
+\textbf{Calculation of}: $var(X) = \frac{1}{N} \sum_{n=1}^N (X_i - \bar{X})^2$
+
+\subsection*{Iterative View}
+Residual $r_i$: $x_i - \tilde{x}_i = I - uu^T  x_i$\\
+Cov of $r$:  $\frac{1}{n} \sum_{i=1}^n (I-uu^T)x_i x_i^T (I-uu^T)^T =$ \\
+$(I-uu^T) \Sigma (I-uu^T)^T = \Sigma - 2\Sigma u u^T + u u^T \Sigma u u ^T = \Sigma - \lambda uu^T$ \\
+1. Find principal eigenvector of $(\Sigma - \lambda u u^T)$\\
+2. which is the second eigenvector of $\Sigma$\\
+3. iterating to get $d$ principal eigenvector of $\Sigma$
+
+\subsection*{Power Method}
+Power iteration: $v_{t+1} = \frac{Av_t}{||Av_t||}$, $\lim_{t \rightarrow \infty} v_t = u_1$\\
+Assuming $\langle u_1, v_0 \rangle \not = 0$ and $|\lambda_1| > |\lambda_j| (\forall j \geq 2)$
+\subsection*{Reconstruction Proof Sketch}
+Given: $\tilde{X} = U_KU_K^{\top}\bar{X}$
+To prove: squared reconstruction error is the sum of the lowest $D - K$ eigenvalues of $\Sigma$.
+$err = 1/N\sum_{i=1}^{N}\|\tilde{x_i} - \bar{x_i}\|_2^2 = 1/N\|\tilde{X} - \bar{X}\|_F^2 = 1/N\|(U_KU_K^{\top} - I_d)\bar{X}\|_F^2 = 1/N* trace((U_KU_K^{\top} - I_d)\bar{X} \bar{X}^{\top}(U_KU_K^{\top} - I_d)^{\top} =  1/N*trace(([U_K;0] - U)\Lambda([U_K;0] - U)^{\top})$

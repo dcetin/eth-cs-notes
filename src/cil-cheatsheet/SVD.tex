@@ -1,0 +1,21 @@
+% -*- root: Main.tex -*-
+\section{Singular Value Decomposition}
+$\mathbf{A} = \mathbf{U} \mathbf{D} \mathbf{V}^\top = \sum_{k=1}^{\operatorname{rank}(\mathbf{A})} d_{k,k} u_k (v_k)^\top$\\
+$\mathbf{A} \in \mathbb{R}^{N \times P}, \mathbf{U} \in \mathbb{R}^{N \times N}, \mathbf{D} \in \mathbb{R}^{N \times P}, \mathbf{V} \in \mathbb{R}^{P \times P}$\\
+$\mathbf{U}^\top \mathbf{U} = I = \mathbf{V}^\top \mathbf{V}$ ($\mathbf{U}, \mathbf{V}$ orthonormal)\\
+$\mathbf{U}$ columns are eigvecs of $\mathbf{A} \mathbf{A}^\top$, $\mathbf{V}$ columns are eigvecs of $\mathbf{A}^\top \mathbf{A}$, $\mathbf{D}$ diag. elements are singular values.\\
+$(\mathbf{D}^{-1})_{i,i} = \frac{1}{\mathbf{D}_{i, i}}$ (don't forget to transpose)
+
+1. calculate $\mathbf{A}^\top \mathbf{A}$.\\
+2. calculate eigvals of $\mathbf{A}^\top \mathbf{A}$, the square root of them, in descending order, are the diagonal elements of $\mathbf{D}$.\\
+3. calc. eigvecs of $\mathbf{A}^\top \mathbf{A}$ using eigvals resulting in the columns of $\mathbf{V}$.\\
+4. calculate the missing matrix: $\mathbf{U} = \mathbf{A} \mathbf{V} \mathbf{D}^{-1}$.\\
+5. normalize each column of $\mathbf{U}$ and $\mathbf{V}$.
+
+\subsection*{Low-Rank approximation}
+Use only $K$ largest eigvals (and corresp. eigvecs). $\tilde{\mathbf{A}}_{i, j} = \sum_{k=1}^K \mathbf{U}_{i, k} \mathbf{D}_{k,k} \mathbf{V}_{j, k} = \sum_{k=1}^K \mathbf{U}_{i, k} \mathbf{D}_{k,k} (\mathbf{V}^\top)_{k, j}$.
+
+\subsection*{Echart-Young Theorem}
+$\mathbf{A}_k=\argmin_{rank(B)=k}\|\mathbf{A-B}\|_F^2$ (not convex)
+$\min_{rank(B)=K} ||A-B||_F^2 = ||A-A_k||_F^2 = \sum_{r=k+1}^{rank(A)} \sigma_r^2$
+$\min_{rank(B)=K} ||A-B||_2 = ||A-A_k||_2 = \sigma_{k+1}$

@@ -1,0 +1,8 @@
+\section{Dictionary Learning}
+
+Adapt dict. to signal characteristics. Obj: $(\mathbf{U}^\star, \mathbf{Z}^\star) \in \argmin_\mathbf{U,Z} \| \mathbf{X} - \mathbf{U} \cdot \mathbf{Z} \|_F^2$ not jointly convex but convex in either.
+\textbf{Matrix Fact. by Iter Greedy Min.}
+\begin{inparaenum}[\color{red} 1.]
+  \item Coding step: $\mathbf{Z}^{t+1} \in \argmin_\mathbf{Z} \| \mathbf{X} - \mathbf{U}^t \mathbf{Z} \|_F^2$ subject to $\mathbf{Z}$ being sparse ($\mathbf{z}_n^{t+1}\in \argmin_\mathbf{z}\|\mathbf{z}\|_0$ s.t.$\|\mathbf{x}_n - \mathbf{U}^t\mathbf{z}\|_2 \le \sigma \|\mathbf{x}_n\|_2$)
+  \item Dict update step: $\mathbf{U}^{t+1} \in \argmin_\mathbf{U} \| \mathbf{X} - \mathbf{UZ}^{t+1} \|_F^2$, subj to $\forall l\in [L]:\|\mathbf{u}_l\|_2 = 1$. (set $\mathbf{U} = [\mathbf{u}_1^t\cdots \mathbf{u}_l\cdots \mathbf{u}_L^t],~ \min_{u_l}\|\mathbf{X} - \mathbf{U}\mathbf{Z}^{t+1}\|_F^2 = \min_{u_l}\|\mathbf{R}_l^t - \mathbf{u}_l(\mathbf{z}_l^{t+1})^\top\|_F^2$ with $\mathbf{R}_l^t = \tilde{\mathbf{U}}\Sigma\tilde{\mathbf{V}}^\top$ by $\mathbf{u}^*_l=\tilde{\mathbf{u}}_1$)
+\end{inparaenum}

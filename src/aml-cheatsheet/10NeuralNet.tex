@@ -1,0 +1,9 @@
+\section{Neural Network}
+\subsection*{Backpropagation}
+For each unit $j$ on the output layer:\\
+- Compute error signal: $\delta_j = \ell_j'(f_j)$\\
+- For each unit $i$ on layer $L$: $\frac{\partial}{\partial w_{j,i}} = \delta_j v_i$
+
+For each unit $j$ on hidden layer $l=\{L-1,..,1\}$:\\
+- Error signal: $\delta_j = \phi'(z_j) \sum_{i\in Layer_{l+1}} w_{i,j}\delta_i$\\
+- For each unit $i$ on layer $l-1$: $\frac{\partial}{\partial w_{j,i}} = \delta_j v_i$

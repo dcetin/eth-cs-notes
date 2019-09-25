@@ -1,0 +1,13 @@
+% -*- root: Main.tex -*-
+\section{Bayesian Methods}
+\subsection*{MLE}
+$\theta^* = \operatorname{argmax}_\theta P(y|x,\theta) $\\
+$= {\operatorname{argmax}}_\theta \prod_{i=1}^n P(y_i|x_i, \theta) \text{\quad (iid)}$\\
+$= {\operatorname{argmax}}_\theta \sum_{i=1}^n log P(y_i|x_i,\theta)$
+
+\subsection*{MAP}
+$w^* = \underset{w}{\operatorname{argmax}} P(w|x,y) = \underset{w}{\operatorname{argmax}} \frac{P(w|x) P(y|x,w)}{P(y|x)}$\\ 
+$=\underset{w}{\operatorname{argmax}} log P(w) + \sum_i log P(y_i|x_i,w) + const.$
+
+\subsection*{MLE = MAP}
+$n \rightarrow \infty$ or prior is uniformly distr.

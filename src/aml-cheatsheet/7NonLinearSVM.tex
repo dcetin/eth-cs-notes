@@ -1,0 +1,10 @@
+% -*- root: Main.tex -*-
+\section{Non-linear SVM}
+% \subsection*{Kernel SVM}
+% \textcolor{red}{TODO: add how to kernelize}
+\subsection*{Multiclass SVM}
+$\min_{w, \eta\geq 0} \frac{1}{2} w^T w + C \sum_i \xi_i$\\
+s.t. $\forall y_i \in Y:( w_{z_i}^T y_i) - max_{z \not = z_i} (w_z^T y_i) \geq 1-\xi_i$
+\subsection*{Structured SVM}
+$\min_{w, \eta} \frac{\lambda}{2} ||w||^2 + \frac{1}{n} \sum_{i=1}^n \eta_i$, $\eta \geq H_i(w) \forall i$, where\\
+$H_i(w)=\max_{y \in Y(x_i)} L(y_i, y) - w^T(\phi(x_i,y_i) - \phi(x_i,y))$

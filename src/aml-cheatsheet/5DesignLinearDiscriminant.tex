@@ -1,0 +1,16 @@
+% -*- root: Main.tex -*-
+\section{Design of Discriminant}
+
+
+\subsection*{Fisher's Linear Discriminant:} 
+$\mathbb{R}^d \rightarrow \mathbb{R}^{(k-1)}$: 
+$\vec{y}_i = \vec{w}_i^T\vec{x}, 1 \leq i \leq k - 1, \vec{y} = W^T\vec{x}$
+
+{\footnotesize Criterion:} $J(W) {=} \frac{|W^T\Sigma_B W|}{|W^T\Sigma_w W|} {\stackrel{\text{\tiny 2 classes}}{=}} \frac{(m_2 - m_1)^2}{s_1^2 + s_2^2}
+\rightarrow \stackrel{\text{\tiny maximize}}{\text{\tiny $d/dW = 0$}}$ \\
+$\Sigma_B = \sum_i n_i (m_i-m)(m_i-m)^T$ {\tiny(Between class variance)} \\
+$\Sigma_W = \sum_i \sum_{x \in X_i} (x - m_i)(x - m_i)^T$ 
+{\tiny(Within class variance)} \\
+$m_i = \frac{1}{n_i} \sum_{x \in X_i} x$, $m = \frac{1}{n}\sum_x x$	
+
+solution: $\hat{w} \stackrel{\text{\tiny 2 classes}} {=} \Sigma_W^{-1} (m_1 - m_2)$

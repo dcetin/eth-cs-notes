@@ -1,0 +1,36 @@
+% -*- root: Main.tex -*-
+\section{Ensemble method}
+\subsection*{Random Forest}
+for b=1:B do:\\
+draw a bootstrap sample $D_b$\\
+repeat until node size<$n_{min}$:\\
+1. select $m$ features from $p$ features\\
+2. pick the best variable and split-point\\
+3. Split the node accordingly\\
+return the forest $\{\hat{c}_b(x)\}_{b=1}^B$
+
+Boosting: Train weak learners sequentially on all data, but reweight misclassifed samples higher, Bias $\downarrow$
+\subsection*{Adaboost}
+Initialize weights $w_i = 1/n$, for b=1:B do:\\
+1. Fit classifier $c_b(x)$ with weights $w_i$\\
+2. Compute error $\epsilon_b = \sum_i w_i^{(b)} \mathbbm{1}_{[c_b(x_i) \not = y_i]} / \sum_i w_i^{(b)}$\\
+3. Compute coeff. $\alpha_b = log(\frac{1-\epsilon_b}{\epsilon_b})$\\
+4. Update weights $w_i = w_i \exp(\alpha_b \mathbbm{1}_{[y_i \not = c_b(x_i)]})$
+Return $\hat{c}_B(x) = \text{sign} \left ( \sum_{b=1}^B \alpha_b c_b(x) \right )$\\
+Loss: Exponential loss function\\
+Model: Additive logistic regression\\
+Bayesian approach (assumes posteriors)\\
+Newtonlike updates (Gradient Descent)
+
+%\newpage
+
+\subsection*{Bagging}
+%\textbf{for} $b=1$ to $B$ \textbf{do}:\\
+%1. $Z^{*b}=$ b-th bootstrap sample from Z\\
+%2. Construct classifier $c_b$ based on $Z^{*b}$\\
+\textbf{return} ensemble class. $\hat{c}_B(x)=sgn(\sum_{i=1}^{B} c_i(x))$\\
+\textbf{Works}: Covariance small (different subset for training), Variance small (similar behaviour of weak learners), biases weakly affected.\\
+%\textbf{Bag. aggr. pred.}: $h_B(x)=E_{D'\sim D}[h_{D'}(x)]$\\
+%\textbf{Ideal aggr. pred.}: $h_A(x)=E_{D\sim P(x,y)}[h_D(x)]$\\
+%$E_D[L(y,h_D(x))]=E_D[(y-h_D(x))^2]=E_D[y^2]-2E_D[y\cdot h_D(x)]+E_D[h_D(x)^2]=y^2-2y\cdot E_D[h_D(x)]+E_D[h_D(x)^2]\geq y^2-2y\cdot E_D[h_D(x)]+E_D[h_D(x)]^2=y^2-2y\cdot h_A(x)+h_A(x)^2=(y-h_A(x))^2=L(y,h_A(x))$\\
+\textbf{Bias$\downarrow$\&Var.$\downarrow$}: Use complex decision tree (bias$\downarrow$), ensemble mult. decision trees (var$\downarrow$)
