@@ -11,7 +11,7 @@ Asymptotic normality: $\sqrt{N}(\theta - \hat{\theta_n}) \to \mathcal{N}(0, J^{-
 Asymptotic efficiency: $\hat{\theta_n}$ has the smallest variance among all possible consistent estimators (for large enough N), i.e. $\lim_{n\to\infty} (V[\hat{\theta_n}]I(\theta))^{-1} = 1$
 	$\hat{\theta}_{MAP} := \argmax_\theta \left \{ \sum_{i=1}^n log(p(x_i | \theta) + log(p(\theta)) \right\}$
 \subsection*{Rao-Cramer}
-$\Lambda = \frac{\partial \log \mathbb{P}(x|\theta )}{\partial x}$ (score function), $E[\Lambda ]=0$\\
+$\Lambda = \frac{\partial \log \mathbb{P}(x|\theta )}{\partial \theta}$ (score function), $E[\Lambda ]=0$\\
 Fisher information: $I= \mathbb{V}[\Lambda]$ \\
 $J= E[\Lambda^{2}]= -E[\frac{\partial^2 \log \mathbb{P}(x|\theta ) }{\partial \theta \partial \theta ^{T}}]= -E[\frac{\partial \Lambda}{\partial \theta}]$ \\
 variance of an estimator is bounded from below by the inverse of Fisher information \\
