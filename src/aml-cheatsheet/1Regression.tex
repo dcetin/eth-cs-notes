@@ -18,7 +18,7 @@ variance of an estimator is bounded from below by the inverse of Fisher informat
 MSE bound: $E[(\hat \theta -\theta )^{2}] \geq \frac{[1 + b^{\prime} (\theta)]^{2}}{n E[\Lambda ^{2}]} + b_{\hat \theta}^{2}$ \\
 Biased estimators: $var(\hat{\theta}) \geq \frac{[1 + b^{\prime}(\theta)]^2}{I(\theta)}$ \\
 Efficiency: $e(\hat{\theta}) = \frac{I(\theta)^{-1}}{var(\hat{\theta})} \leq 1$ \\
-Cauchy-Schwarz: $|E(X,Y)|^2 \leq E(X)^2 E(Y)^2$ 
+Cauchy-Schwarz: $|E(X,Y)|^2 \leq E(X^2) E(Y^2)$ 
 
 \subsection*{Regularized regression}
 Error: $\hat{R}(w) = \sum \limits_{i=1}^n (y_i - w^Tx_i)^2 + \lambda ||w||_2^2$ (Ridge) \\
